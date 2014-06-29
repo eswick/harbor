@@ -22,6 +22,8 @@
 - (void)collapseAnimated:(BOOL)animated;
 - (CGFloat)collapsedIconWidth;
 - (void)updateIconTransforms;
+- (CGFloat)horizontalIconBounds;
+- (NSUInteger)columnAtX:(CGFloat)x;
 
 @end
 
@@ -49,11 +51,18 @@
 
 #pragma mark Layout
 
+static const CGFloat kHorizontalIconInset = 15.0f;
+
+%new
+- (CGFloat)horizontalIconBounds {
+	return self.bounds.size.width - kHorizontalIconInset * 2;
+}
+
 %new
 - (CGFloat)collapsedIconScale {
 	CGFloat normalIconSize = [%c(SBIconView) defaultVisibleIconImageSize].width;
 
-	CGFloat newIconSize = self.bounds.size.width / self.model.numberOfIcons;
+	CGFloat newIconSize = [self horizontalIconBounds] / self.model.numberOfIcons;
 
 	return MIN(newIconSize / normalIconSize, 1);
 }
@@ -94,6 +103,7 @@ static const CGFloat FingerTranslation = 75.0;
 	return -((cos(offset / ((FingerTranslationRadius) / M_PI)) + 1) / ( 1 / (FingerTranslation / 2)));
 }
 
+
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
 	
 	[UIView animateWithDuration:animationDuration animations:^{
@@ -104,7 +114,7 @@ static const CGFloat FingerTranslation = 75.0;
 
 			CGPoint center = CGPointZero;
 
-			center.x = ([self collapsedIconWidth] * i) + [self collapsedIconWidth] / 2;
+			center.x = ([self collapsedIconWidth] * i) + ([self collapsedIconWidth] / 2) + (self.bounds.size.width - [self horizontalIconBounds]) / 2;
 			center.y = self.bounds.size.height / 2;
 
 			iconView.center = center;
@@ -126,7 +136,7 @@ static const CGFloat FingerTranslation = 75.0;
 		expansionSurplus += [self scaleForOffsetFromFocusPoint:i * [self collapsedIconWidth]] * [%c(SBIconView) defaultVisibleIconImageSize].width - [self collapsedIconWidth];
 	}
 
-	CGFloat origin = -(expansionSurplus / 2);
+	CGFloat origin = (self.bounds.size.width - [self horizontalIconBounds]) / 2 - (expansionSurplus / 2);
 
 	for (int i = 0; i < self.model.numberOfIcons; i++) {
 		SBIcon *icon = self.model.icons[i];
@@ -174,12 +184,8 @@ static const CGFloat FingerTranslation = 75.0;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 
 	if ([[touches anyObject] locationInView:self].y < 0 && ![[%c(SBIconController) sharedInstance] grabbedIcon]) {
-		CGFloat collapsedItemWidth = [self collapsedIconScale] * [%c(SBIconView) defaultVisibleIconImageSize].width;
-		NSInteger index = floorf((self.focusPoint) / collapsedItemWidth);
 
-		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[index]];
-
-		
+		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:self.focusPoint]]];
 
 		// get origin, remove transform, restore origin
 		CGPoint origin = iconView.origin;
@@ -221,8 +227,7 @@ static const CGFloat FingerTranslation = 75.0;
 		return;
 	}
 
-	CGFloat collapsedItemWidth = [self collapsedIconScale] * [%c(SBIconView) defaultVisibleIconImageSize].width;
-	NSInteger index = floorf((self.focusPoint) / collapsedItemWidth);
+	NSInteger index = [self columnAtX:self.focusPoint];
 
 	if (index > self.model.numberOfIcons - 1) {
 		// No icon at this position
@@ -258,14 +263,20 @@ static const CGFloat FingerTranslation = 75.0;
 	[self collapseAnimated:true];
 }
 
+%new
+- (NSUInteger)columnAtX:(CGFloat)x {
+	return [self columnAtPoint:CGPointMake(x, 0)];
+}
+
 - (NSUInteger)columnAtPoint:(struct CGPoint)arg1 {
 	CGFloat collapsedItemWidth = [self collapsedIconScale] * [%c(SBIconView) defaultVisibleIconImageSize].width;
-	NSUInteger index = floorf(arg1.x / collapsedItemWidth);
+
+	NSUInteger index = floorf((arg1.x - (self.bounds.size.width - [self horizontalIconBounds]) / 2) / collapsedItemWidth);
 
 	return index;
 }
 
-- (void)removeIconAtIndex:(unsigned long)arg1 {
+- (void)removeIconAtIndex:(NSUInteger)arg1 {
 	%orig;
 	[self collapseAnimated:true];
 }
