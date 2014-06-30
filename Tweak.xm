@@ -374,7 +374,12 @@ static const CGFloat kMaxScale = 1.0;
 
 	SBIconView *iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[index]];
 
+	[self bringSubviewToFront:iconView];
+
 	self.activatingIcon = iconView;
+	self.focusPoint = iconView.center.x;
+
+	[self layoutIconsIfNeeded:0.2 domino:false];
 
 	[[%c(SBIconController) sharedInstance] iconTapped:iconView];
 }
