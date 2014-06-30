@@ -41,7 +41,9 @@
 
 #pragma mark Constants
 
-static const CGFloat kHorizontalIconInset = 15.0f;
+static const CGFloat kHorizontalIconInset = 15.0;
+static const CGFloat kCancelGestureRange = 10.0;
+
 static const CGFloat kEffectiveRange = 60.0;
 static const CGFloat kMaxScale = 1.0;
 
@@ -364,6 +366,12 @@ static const CGFloat kMaxScale = 1.0;
 	}
 
 	[self updateIndicatorForIconView:nil animated:true];
+
+	if([[touches anyObject] locationInView:self].y > self.bounds.size.height - kCancelGestureRange) {
+		// User swiped off to the bottom edge of the screen; collapse and do nothing
+		[self collapseAnimated:true];
+		return;
+	}
 
 	NSInteger index = [self columnAtX:self.focusPoint];
 
