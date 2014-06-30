@@ -8,15 +8,21 @@
 #import "SBIcon.h"
 #import "SBScaleIconZoomAnimator.h"
 
+#pragma mark Declarations
+
 @interface SBDockIconListView ()
 
 @property (nonatomic, assign) CGFloat focusPoint;
 @property (nonatomic, assign) BOOL trackingTouch;
 @property (nonatomic, assign) SBIconView *activatingIcon;
 
+@property (nonatomic, assign) CGFloat maxTranslationX;
+@property (nonatomic, assign) CGFloat xTranslationDamper;
+
 - (CGFloat)collapsedIconScale;
 - (CGFloat)scaleForOffsetFromFocusPoint:(CGFloat)offset;
 - (CGFloat)yTranslationForOffsetFromFocusPoint:(CGFloat)offset;
+- (CGFloat)xTranslationForOffsetFromFocusPoint:(CGFloat)offset;
 - (void)didAnimateZoomUp;
 - (void)didAnimateZoomDown;
 - (void)collapseAnimated:(BOOL)animated;
@@ -27,11 +33,24 @@
 
 @end
 
+#pragma mark Constants
+
+static const CGFloat kHorizontalIconInset = 15.0f;
+static const CGFloat kEffectiveRange = 60.0;
+static const CGFloat kMaxScale = 1.0;
+
+#pragma mark -
+
 %hook SBDockIconListView
+
+/* These properties should not normally have the retain attribute. I will eventually update Logos to fix this. */
 
 %property (nonatomic, retain) CGFloat focusPoint;
 %property (nonatomic, retain) BOOL trackingTouch;
 %property (nonatomic, assign) SBIconView *activatingIcon;
+
+%property (nonatomic, retain) CGFloat maxTranslationX;
+%property (nonatomic, retain) CGFloat xTranslationDamper;
 
 + (NSUInteger)iconColumnsForInterfaceOrientation:(NSInteger)arg1{
 	return 100;
@@ -50,8 +69,6 @@
 }
 
 #pragma mark Layout
-
-static const CGFloat kHorizontalIconInset = 15.0f;
 
 %new
 - (CGFloat)horizontalIconBounds {
@@ -72,40 +89,52 @@ static const CGFloat kHorizontalIconInset = 15.0f;
 	return [self collapsedIconScale] * [%c(SBIconView) defaultVisibleIconImageSize].width;
 }
 
-#define EXPANSION_NEIGHBORS 3
-
 %new
 - (CGFloat)scaleForOffsetFromFocusPoint:(CGFloat)offset {
-	CGSize defaultSize = [%c(SBIconView) defaultVisibleIconImageSize];
 
-	CGFloat normalizedOffset = fabsf(offset / (defaultSize.width * [self collapsedIconScale]));
-	CGFloat scalar = 0.0;
+	if (fabs(offset) > kEffectiveRange)
+		return [self collapsedIconScale];
 
-	if (normalizedOffset <= 0.5) {
-		scalar = 1.0;
-	} else if (normalizedOffset < (EXPANSION_NEIGHBORS + 0.5)) {
-		scalar = ((EXPANSION_NEIGHBORS + 0.5) - normalizedOffset) / EXPANSION_NEIGHBORS;
-	}
-
-	CGFloat scaledHeight = defaultSize.width * scalar + (defaultSize.width * [self collapsedIconScale]) * (1.0 - scalar);
-	return scaledHeight / defaultSize.width;
+	return MAX((cos(offset / ((kEffectiveRange) / M_PI)) + 1.0) / (1.0 / (kMaxScale / 2.0)), [self collapsedIconScale]);
 }
 
-static const CGFloat FingerTranslationRadius = 50.0;
-static const CGFloat FingerTranslation = 75.0;
+%new
+- (CGFloat)xTranslationForOffsetFromFocusPoint:(CGFloat)offset {
+	return -(atan(offset / (self.xTranslationDamper * (M_PI / 4))) * ((self.maxTranslationX) / (M_PI / 2)));
+}
 
 %new
 - (CGFloat)yTranslationForOffsetFromFocusPoint:(CGFloat)offset {
+	CGFloat evasionDistance = [%c(SBIconView) defaultVisibleIconImageSize].width;
 
-	if (fabs(offset) > FingerTranslationRadius )
+	if (fabs(offset) > kEffectiveRange)
 		return 0;
 
-	return -((cos(offset / ((FingerTranslationRadius) / M_PI)) + 1) / ( 1 / (FingerTranslation / 2)));
+	return -((cos(offset / ((kEffectiveRange) / M_PI)) + 1.0) / (1.0 / (evasionDistance / 2.0)));
 }
 
-
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
-	
+	CGFloat defaultWidth = [%c(SBIconView) defaultVisibleIconImageSize].width;
+
+	self.xTranslationDamper = acos((kEffectiveRange * [self collapsedIconScale]) / (kEffectiveRange / 2) - 1) * (kEffectiveRange / M_PI);
+	self.maxTranslationX = 0;
+
+	// Calculate total X translation
+
+	int iconsInRange = (int)floor(kEffectiveRange / [self collapsedIconWidth]);
+	float offset = 0;
+
+	for (int i = 0; i < 2; i++) {
+		// Run twice, once for left side of focus, and one for right side of focus
+
+		for (int i = 0; i < iconsInRange; i++) {
+			self.maxTranslationX += ([self scaleForOffsetFromFocusPoint:offset] * defaultWidth) - [self collapsedIconWidth];
+			offset += [self collapsedIconWidth];
+		}
+
+		offset = [self collapsedIconWidth]; // Set to collapsed icon width, so we skip the center icon on the second run
+	}
+
 	[UIView animateWithDuration:animationDuration animations:^{
 		for (int i = 0; i < self.model.numberOfIcons; i++) {
 
@@ -130,14 +159,6 @@ static const CGFloat FingerTranslation = 75.0;
 %new
 - (void)updateIconTransforms {
 
-	CGFloat expansionSurplus = 0;
-
-	for (int i = -EXPANSION_NEIGHBORS - 1; i < EXPANSION_NEIGHBORS + 1; i++) {
-		expansionSurplus += [self scaleForOffsetFromFocusPoint:i * [self collapsedIconWidth]] * [%c(SBIconView) defaultVisibleIconImageSize].width - [self collapsedIconWidth];
-	}
-
-	CGFloat origin = (self.bounds.size.width - [self horizontalIconBounds]) / 2 - (expansionSurplus / 2);
-
 	for (int i = 0; i < self.model.numberOfIcons; i++) {
 		SBIcon *icon = self.model.icons[i];
 		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:icon];
@@ -148,24 +169,18 @@ static const CGFloat FingerTranslation = 75.0;
 
 
 		CGFloat scale = [self collapsedIconScale];
+
 		CGFloat tx = 0;
 		CGFloat ty = 0;
 
 		if (self.trackingTouch) {
 			scale = [self scaleForOffsetFromFocusPoint:offsetFromFocusPoint];
 			ty = [self yTranslationForOffsetFromFocusPoint:offsetFromFocusPoint];
-
-
-			CGFloat width = [%c(SBIconView) defaultVisibleIconImageSize].width * scale;
-
-			tx = origin - (iconView.center.x - width / 2);
-			origin += width;
+			tx = [self xTranslationForOffsetFromFocusPoint:offsetFromFocusPoint];
 		}
 
 
 		iconView.transform = CGAffineTransformConcat(CGAffineTransformMakeScale(scale, scale), CGAffineTransformMakeTranslation(tx, ty));
-
-
 	}
 
 }
@@ -245,6 +260,8 @@ static const CGFloat FingerTranslation = 75.0;
 	self.trackingTouch = false;
 	[self layoutIconsIfNeeded:0 domino:false];
 }
+
+#pragma mark -
 
 %new
 - (void)collapseAnimated:(BOOL)animated {

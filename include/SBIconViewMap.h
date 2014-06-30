@@ -11,7 +11,7 @@
 #import "SBIconViewObserver-Protocol.h"
 #import "SBIconViewMapDelegate-Protocol.h"
 
-@class NSMapTable, SBIconModel, _UILegibilitySettings;
+@class NSMapTable, SBIconModel, _UILegibilitySettings, SBIconView;
 
 @interface SBIconViewMap : SBReusableViewMap <SBIconObserver, SBIconIndexNodeObserver, SBIconViewObserver>
 {
@@ -53,7 +53,7 @@
 - (id)iconViewForIcon:(id)arg1;
 - (id)_iconViewForIcon:(id)arg1;
 - (id)newViewOfClass:(Class)arg1;
-- (id)mappedIconViewForIcon:(id)arg1;
+- (SBIconView*)mappedIconViewForIcon:(id)arg1;
 - (void)invalidate;
 - (void)dealloc;
 - (id)initWithIconModel:(id)arg1 delegate:(id)arg2 viewDelegate:(id)arg3;
