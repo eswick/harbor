@@ -7,6 +7,7 @@
 #import "SBIconController.h"
 #import "SBIcon.h"
 #import "SBScaleIconZoomAnimator.h"
+#import "SBWallpaperEffectView.h"
 
 #pragma mark Declarations
 
@@ -19,6 +20,10 @@
 @property (nonatomic, assign) CGFloat maxTranslationX;
 @property (nonatomic, assign) CGFloat xTranslationDamper;
 
+@property (nonatomic, retain) UIView *indicatorView;
+@property (nonatomic, assign) UILabel *indicatorLabel;
+@property (nonatomic, assign) SBIconView *focusedIconView;
+
 - (CGFloat)collapsedIconScale;
 - (CGFloat)scaleForOffsetFromFocusPoint:(CGFloat)offset;
 - (CGFloat)yTranslationForOffsetFromFocusPoint:(CGFloat)offset;
@@ -30,6 +35,7 @@
 - (void)updateIconTransforms;
 - (CGFloat)horizontalIconBounds;
 - (NSUInteger)columnAtX:(CGFloat)x;
+- (void)updateIndicatorForIconView:(SBIconView*)iconView animated:(BOOL)animated;
 
 @end
 
@@ -52,6 +58,10 @@ static const CGFloat kMaxScale = 1.0;
 %property (nonatomic, retain) CGFloat maxTranslationX;
 %property (nonatomic, retain) CGFloat xTranslationDamper;
 
+%property (nonatomic, retain) UIView *indicatorView;
+%property (nonatomic, assign) UILabel *indicatorLabel;
+%property (nonatomic, assign) SBIconView *focusedIconView;
+
 + (NSUInteger)iconColumnsForInterfaceOrientation:(NSInteger)arg1{
 	return 100;
 }
@@ -59,6 +69,46 @@ static const CGFloat kMaxScale = 1.0;
 - (id)initWithModel:(id)arg1 orientation:(NSInteger)arg2 viewMap:(id)arg3 {
 	self = %orig;
 	if (self) {
+
+		
+
+		// Set up indicator view
+		self.indicatorView = [[UIView alloc] init];
+
+		self.indicatorView.clipsToBounds = true;
+		self.indicatorView.layer.cornerRadius = 5;
+
+		// Add background view
+		SBWallpaperEffectView *indicatorBackgroundView = [[%c(SBWallpaperEffectView) alloc] initWithWallpaperVariant:1];
+		indicatorBackgroundView.style = 11;
+		indicatorBackgroundView.translatesAutoresizingMaskIntoConstraints = false;
+
+		[self.indicatorView addSubview:indicatorBackgroundView];
+		[indicatorBackgroundView release];
+
+		// Set up label
+		UILabel *indicatorLabel = [[UILabel alloc] init];
+		indicatorLabel.font = [UIFont systemFontOfSize:14];
+		indicatorLabel.textColor = [UIColor whiteColor];
+		indicatorLabel.textAlignment = NSTextAlignmentCenter;
+		[self.indicatorView addSubview:indicatorLabel];
+		self.indicatorLabel = indicatorLabel;
+
+		[indicatorLabel release];
+
+		// Setup constraints
+		NSMutableArray *constraints = [NSMutableArray new];
+
+		[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[v]-0-|" options:0 metrics:nil views: @{ @"v" : indicatorBackgroundView }]];
+		[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[v]-0-|" options:0 metrics:nil views: @{ @"v" : indicatorBackgroundView }]];
+		[self.indicatorView addConstraints:constraints];
+
+		[constraints release];
+
+		// -
+
+		[self addSubview:self.indicatorView];
+		[self.indicatorView release];
 
 	}
 	return self;
@@ -185,6 +235,57 @@ static const CGFloat kMaxScale = 1.0;
 
 }
 
+%new
+- (void)updateIndicatorForIconView:(SBIconView*)iconView animated:(BOOL)animated {
+
+	if (!iconView) {
+
+		if (animated) {
+			[UIView animateWithDuration:0.2 animations:^{
+				self.indicatorView.alpha = 0;
+			} completion:^(BOOL finished) {
+				self.indicatorView.hidden = true;
+				self.indicatorView.alpha = 1;
+			}];
+		}else{
+			self.indicatorView.hidden = true;
+		}
+		
+		return;
+	}else{
+		if (animated && self.indicatorView.hidden) {
+			self.indicatorView.alpha = 0;
+			self.indicatorView.hidden = false;
+
+			[UIView animateWithDuration:0.2 animations:^{
+				self.indicatorView.alpha = 1;
+			} completion:nil];
+		}else{
+			self.indicatorView.hidden = false;
+		}
+	}
+
+	void (^animations) (void) = ^{
+
+		NSString *text = iconView.icon.displayName;
+		CGFloat evasionDistance = [%c(SBIconView) defaultVisibleIconImageSize].width;
+		CGRect textRect = [text boundingRectWithSize:[%c(SBIconView) maxLabelSize] options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil];
+
+		self.indicatorView.bounds = CGRectMake(0, 0, textRect.size.width + 30, textRect.size.height + 30);
+		self.indicatorView.center = CGPointMake(MAX(MIN(iconView.center.x, self.bounds.size.width - self.indicatorView.bounds.size.width / 2), self.indicatorView.bounds.size.width / 2), (self.bounds.size.height / 2) - evasionDistance - self.indicatorView.bounds.size.height - 20.0);
+
+		self.indicatorLabel.text = text;
+		self.indicatorLabel.bounds = textRect;
+		self.indicatorLabel.center = CGPointMake(self.indicatorView.bounds.size.width / 2, self.indicatorView.bounds.size.height / 2);
+
+	};
+
+	if (animated)
+		[UIView animateWithDuration:0.1 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:animations completion:nil];
+	else
+		animations();
+}
+
 #pragma mark Touch Handling
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -192,7 +293,16 @@ static const CGFloat kMaxScale = 1.0;
 	self.focusPoint = [[touches anyObject] locationInView:self].x;
 	self.activatingIcon = nil;
 
-	[self layoutIconsIfNeeded:0.25 domino:false];	
+	[self layoutIconsIfNeeded:0.25 domino:false];
+
+	// Update indicator
+	SBIconView *focusedIcon = nil;
+
+	@try {
+		focusedIcon = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:self.focusPoint]]];
+	}@catch (NSException *exception) { }
+
+	[self updateIndicatorForIconView:focusedIcon animated:false];
 }
 
 
@@ -220,6 +330,8 @@ static const CGFloat kMaxScale = 1.0;
 		[iconView touchesBegan:touches withEvent:nil];
 		[iconView longPressTimerFired];
 
+		[self updateIndicatorForIconView:nil animated:true];
+
 		return;
 	}
 
@@ -231,6 +343,15 @@ static const CGFloat kMaxScale = 1.0;
 
 	self.focusPoint = [[touches anyObject] locationInView:self].x;
 	[self layoutIconsIfNeeded:0 domino:false];
+
+	// Update indicator
+	SBIconView *focusedIcon = nil;
+
+	@try {
+		focusedIcon = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:self.focusPoint]]];
+	}@catch (NSException *exception) { }
+
+	[self updateIndicatorForIconView:focusedIcon animated:true];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -241,6 +362,8 @@ static const CGFloat kMaxScale = 1.0;
 		[iconView touchesEnded:touches withEvent:nil];
 		return;
 	}
+
+	[self updateIndicatorForIconView:nil animated:true];
 
 	NSInteger index = [self columnAtX:self.focusPoint];
 
