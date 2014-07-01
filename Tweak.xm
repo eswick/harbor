@@ -390,12 +390,14 @@ static const CGFloat kMaxScale = 1.0;
 
 	NSInteger index = [self columnAtX:self.focusPoint];
 
-	if (index > self.model.numberOfIcons - 1) {
-		// No icon at this position
+	SBIconView *iconView = nil;
+
+	@try {
+		iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[index]];
+	}@catch (NSException *e) {
+		[self collapseAnimated:true];
 		return;
 	}
-
-	SBIconView *iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[index]];
 
 	[self bringSubviewToFront:iconView];
 
