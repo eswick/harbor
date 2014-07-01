@@ -8,6 +8,7 @@
 #import "SBIcon.h"
 #import "SBScaleIconZoomAnimator.h"
 #import "SBWallpaperEffectView.h"
+#import "SBUIAnimationZoomUpAppFromHome.h"
 
 #pragma mark Declarations
 
@@ -446,6 +447,18 @@ static const CGFloat kMaxScale = 1.0;
 - (void)removeIconAtIndex:(NSUInteger)arg1 {
 	%orig;
 	[self collapseAnimated:true];
+}
+
+%end
+
+%hook SBUIAnimationZoomUpAppFromHome
+
+- (void)animateZoomWithCompletion:(void(^)(void))arg1 {
+	if (self.animationTransition == 3) {
+		[[[%c(SBIconController) sharedInstance] dockListView] collapseAnimated:true];
+	}
+
+	%orig;
 }
 
 %end
