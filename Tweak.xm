@@ -196,7 +196,7 @@ static const CGFloat kMaxScale = 1.0;
 	}
 
 	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [%c(SBIconView) defaultVisibleIconImageSize].width) / 2, 0);
-	
+
 	[UIView animateWithDuration:animationDuration animations:^{
 		for (int i = 0; i < self.model.numberOfIcons; i++) {
 
@@ -320,9 +320,13 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 
-	if ([[touches anyObject] locationInView:self].y < 0 && ![[%c(SBIconController) sharedInstance] grabbedIcon]) {
+	SBIconView *iconView = nil;
 
-		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:self.focusPoint]]];
+	@try {
+		iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:self.focusPoint]]];
+	} @catch (NSException *e) { }
+
+	if ([[touches anyObject] locationInView:self].y < 0 && ![[%c(SBIconController) sharedInstance] grabbedIcon] && iconView) {
 
 		// get origin, remove transform, restore origin
 		CGPoint origin = iconView.origin;
