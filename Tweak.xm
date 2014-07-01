@@ -72,7 +72,7 @@ static const CGFloat kMaxScale = 1.0;
 	self = %orig;
 	if (self) {
 
-		
+
 
 		// Set up indicator view
 		self.indicatorView = [[UIView alloc] init];
@@ -133,6 +133,10 @@ static const CGFloat kMaxScale = 1.0;
 
 	CGFloat newIconSize = [self horizontalIconBounds] / self.model.numberOfIcons;
 
+	if (self.model.numberOfIcons == 0) {
+		return 1;
+	}
+
 	return MIN(newIconSize / normalIconSize, 1);
 }
 
@@ -152,6 +156,10 @@ static const CGFloat kMaxScale = 1.0;
 
 %new
 - (CGFloat)xTranslationForOffsetFromFocusPoint:(CGFloat)offset {
+
+	if (self.xTranslationDamper == 0)
+		self.xTranslationDamper = 1;
+
 	return -(atan(offset / (self.xTranslationDamper * (M_PI / 4))) * ((self.maxTranslationX) / (M_PI / 2)));
 }
 
@@ -252,7 +260,7 @@ static const CGFloat kMaxScale = 1.0;
 		}else{
 			self.indicatorView.hidden = true;
 		}
-		
+
 		return;
 	}else{
 		if (animated && self.indicatorView.hidden) {
