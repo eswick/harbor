@@ -195,6 +195,8 @@ static const CGFloat kMaxScale = 1.0;
 		offset = [self collapsedIconWidth]; // Set to collapsed icon width, so we skip the center icon on the second run
 	}
 
+	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [%c(SBIconView) defaultVisibleIconImageSize].width) / 2, 0);
+	
 	[UIView animateWithDuration:animationDuration animations:^{
 		for (int i = 0; i < self.model.numberOfIcons; i++) {
 
@@ -203,7 +205,7 @@ static const CGFloat kMaxScale = 1.0;
 
 			CGPoint center = CGPointZero;
 
-			center.x = ([self collapsedIconWidth] * i) + ([self collapsedIconWidth] / 2) + (self.bounds.size.width - [self horizontalIconBounds]) / 2;
+			center.x = xOffset + ([self collapsedIconWidth] * i) + ([self collapsedIconWidth] / 2) + (self.bounds.size.width - [self horizontalIconBounds]) / 2;
 			center.y = self.bounds.size.height / 2;
 
 			iconView.center = center;
