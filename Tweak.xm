@@ -174,6 +174,11 @@ static const CGFloat kMaxScale = 1.0;
 	return -((cos(offset / ((kEffectiveRange) / M_PI)) + 1.0) / (1.0 / (evasionDistance / 2.0)));
 }
 
+- (void)updateEditingStateAnimated:(BOOL)arg1 {
+	%orig;
+	[self layoutIconsIfNeeded:0.0 domino:false];
+}
+
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
 	CGFloat defaultWidth = [%c(SBIconView) defaultVisibleIconImageSize].width;
 
