@@ -9,6 +9,7 @@
 #import "SBScaleIconZoomAnimator.h"
 #import "SBWallpaperEffectView.h"
 #import "SBUIAnimationZoomUpAppFromHome.h"
+#import "SBIconFadeAnimator.h"
 
 #pragma mark Declarations
 
@@ -25,17 +26,16 @@
 @property (nonatomic, assign) UILabel *indicatorLabel;
 @property (nonatomic, assign) SBIconView *focusedIconView;
 
+- (CGFloat)horizontalIconBounds;
 - (CGFloat)collapsedIconScale;
+- (CGFloat)collapsedIconWidth;
 - (CGFloat)scaleForOffsetFromFocusPoint:(CGFloat)offset;
 - (CGFloat)yTranslationForOffsetFromFocusPoint:(CGFloat)offset;
 - (CGFloat)xTranslationForOffsetFromFocusPoint:(CGFloat)offset;
-- (void)didAnimateZoomUp;
-- (void)didAnimateZoomDown;
-- (void)collapseAnimated:(BOOL)animated;
-- (CGFloat)collapsedIconWidth;
-- (void)updateIconTransforms;
-- (CGFloat)horizontalIconBounds;
 - (NSUInteger)columnAtX:(CGFloat)x;
+
+- (void)updateIconTransforms;
+- (void)collapseAnimated:(BOOL)animated;
 - (void)updateIndicatorForIconView:(SBIconView*)iconView animated:(BOOL)animated;
 
 @end
@@ -209,15 +209,14 @@ static const CGFloat kMaxScale = 1.0;
 			SBIcon *icon = self.model.icons[i];
 			SBIconView *iconView = [self.viewMap mappedIconViewForIcon:icon];
 
-			CGPoint center = CGPointZero;
+			iconView.location = [self iconLocation];
+			iconView.labelHidden = true;
 
+			CGPoint center = CGPointZero;
 			center.x = xOffset + ([self collapsedIconWidth] * i) + ([self collapsedIconWidth] / 2) + (self.bounds.size.width - [self horizontalIconBounds]) / 2;
 			center.y = self.bounds.size.height / 2;
 
 			iconView.center = center;
-
-			iconView.labelHidden = true;
-
 		}
 
 		[self updateIconTransforms];
@@ -230,8 +229,6 @@ static const CGFloat kMaxScale = 1.0;
 	for (int i = 0; i < self.model.numberOfIcons; i++) {
 		SBIcon *icon = self.model.icons[i];
 		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:icon];
-
-		iconView.location = [self iconLocation];
 
 		const CGFloat offsetFromFocusPoint = self.focusPoint - iconView.center.x;
 
@@ -429,16 +426,6 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 %new
-- (void)didAnimateZoomUp {
-
-}
-
-%new
-- (void)didAnimateZoomDown {
-	[self collapseAnimated:true];
-}
-
-%new
 - (NSUInteger)columnAtX:(CGFloat)x {
 	return [self columnAtPoint:CGPointMake(x, 0)];
 }
@@ -459,14 +446,13 @@ static const CGFloat kMaxScale = 1.0;
 
 %end
 
-%hook SBUIAnimationZoomUpAppFromHome
+#pragma mark Animators
 
-- (void)animateZoomWithCompletion:(void(^)(void))arg1 {
-	if (self.animationTransition == 3) {
-		[[[%c(SBIconController) sharedInstance] dockListView] collapseAnimated:true];
-	}
+%hook SBIconFadeAnimator
 
+- (void)_cleanupAnimation {
 	%orig;
+	[[[%c(SBIconController) sharedInstance] dockListView] collapseAnimated:true];
 }
 
 %end
@@ -477,21 +463,25 @@ static const CGFloat kMaxScale = 1.0;
 	// Prevent this method from changing the origins and transforms of the dock icons
 }
 
-- (void)_animateToFraction:(CGFloat)arg1 afterDelay:(NSTimeInterval)arg2 withSharedCompletion:(void (^) (void))arg3 {
+- (void)_prepareAnimation {
+	// Focus dock on animation target icon
 
-	void (^completionBlock) (void) = ^{
+	SBDockIconListView *dockListView = [[%c(SBIconController) sharedInstance] dockListView];
+	SBIconView *targetIconView = [dockListView.viewMap mappedIconViewForIcon:self.targetIcon];
 
-		if (arg1 == 1) {
-			[self.dockListView didAnimateZoomUp];
-		}else if (arg1 == 0) {
-			[self.dockListView didAnimateZoomDown];
-		}
+	if ([targetIconView isInDock]) {
+		dockListView.activatingIcon = targetIconView;
+		dockListView.focusPoint = targetIconView.center.x;
+		dockListView.trackingTouch = true;
+		[dockListView layoutIconsIfNeeded:0.0 domino:false];
+	}
 
-		arg3();
-	};
+	%orig;
+}
 
-	%orig(arg1, arg2, completionBlock);
-
+- (void)_cleanupAnimation {
+	%orig;
+	[self.dockListView collapseAnimated:true];
 }
 
 %end
