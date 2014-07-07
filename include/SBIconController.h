@@ -218,8 +218,7 @@
 - (id)rootFolder;
 - (id)contentView;
 - (void)dealloc;
-- (id)model;
+- (SBIconModel*)model;
 - (id)init;
 
 @end
-
