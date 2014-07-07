@@ -210,7 +210,6 @@ static const CGFloat kMaxScale = 1.0;
 			SBIconView *iconView = [self.viewMap mappedIconViewForIcon:icon];
 
 			iconView.location = [self iconLocation];
-			iconView.labelHidden = true;
 
 			CGPoint center = CGPointZero;
 			center.x = xOffset + ([self collapsedIconWidth] * i) + ([self collapsedIconWidth] / 2) + (self.bounds.size.width - [self horizontalIconBounds]) / 2;
@@ -340,9 +339,6 @@ static const CGFloat kMaxScale = 1.0;
 		CGRect frame = iconView.frame;
 		frame.size = [%c(SBIconView) defaultIconSize];
 		iconView.frame = frame;
-
-		// set icon label visible
-		iconView.labelHidden = false;
 
 		// set grabbed and begin forwarding touches to icon
 		[[%c(SBIconController) sharedInstance] setGrabbedIcon:iconView.icon];
