@@ -74,6 +74,8 @@ static const CGFloat kMaxScale = 1.0;
 	self = @orig(arg1, arg2, arg3);
 	if (self) {
 
+		self.trackingTouch = false;
+
 		// Set up indicator view
 		self.indicatorView = [[UIView alloc] init];
 
@@ -179,7 +181,7 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
-	
+
 	CGFloat defaultWidth = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 
 	self.xTranslationDamper = acos((kEffectiveRange * [self collapsedIconScale]) / (kEffectiveRange / 2) - 1) * (kEffectiveRange / M_PI);
