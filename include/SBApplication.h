@@ -307,7 +307,7 @@ typedef enum {
 - (BOOL)provisioningProfileValidated;
 - (void)markApplicationIdentityAsTrusted;
 - (id)_expirationDateForProvisioningProfile;
-- (BOOL)_doesProfileMatchSignerIdentity:(struct _MISProfile *)arg1;
+- (BOOL)_doesProfileMatchSignerIdentity:(void *)arg1;
 - (BOOL)_signatureNeedsExplicitUserTrust;
 - (int)applicationSignatureState;
 - (id)signerIdentity;

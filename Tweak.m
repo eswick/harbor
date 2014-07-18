@@ -1,3 +1,5 @@
+#import <objc/runtime.h>
+
 #import "UIView+Origin.h"
 
 #import "SBIconListModel.h"
@@ -26,6 +28,7 @@
 @property (nonatomic, assign) UILabel *indicatorLabel;
 @property (nonatomic, assign) SBIconView *focusedIconView;
 
+@new
 - (CGFloat)horizontalIconBounds;
 - (CGFloat)collapsedIconScale;
 - (CGFloat)collapsedIconWidth;
@@ -50,30 +53,26 @@ static const CGFloat kMaxScale = 1.0;
 
 #pragma mark -
 
-%hook SBDockIconListView
+@hook SBDockIconListView
 
-/* These properties should not normally have the retain attribute. I will eventually update Logos to fix this. */
+@synthesize focusPoint;
+@synthesize trackingTouch;
+@synthesize activatingIcon;
 
-%property (nonatomic, retain) CGFloat focusPoint;
-%property (nonatomic, retain) BOOL trackingTouch;
-%property (nonatomic, assign) SBIconView *activatingIcon;
+@synthesize maxTranslationX;
+@synthesize xTranslationDamper;
 
-%property (nonatomic, retain) CGFloat maxTranslationX;
-%property (nonatomic, retain) CGFloat xTranslationDamper;
-
-%property (nonatomic, retain) UIView *indicatorView;
-%property (nonatomic, assign) UILabel *indicatorLabel;
-%property (nonatomic, assign) SBIconView *focusedIconView;
+@synthesize indicatorView;
+@synthesize indicatorLabel;
+@synthesize focusedIconView;
 
 + (NSUInteger)iconColumnsForInterfaceOrientation:(NSInteger)arg1{
 	return 100;
 }
 
 - (id)initWithModel:(id)arg1 orientation:(NSInteger)arg2 viewMap:(id)arg3 {
-	self = %orig;
+	self = @orig(arg1, arg2, arg3);
 	if (self) {
-
-
 
 		// Set up indicator view
 		self.indicatorView = [[UIView alloc] init];
@@ -82,7 +81,7 @@ static const CGFloat kMaxScale = 1.0;
 		self.indicatorView.layer.cornerRadius = 5;
 
 		// Add background view
-		SBWallpaperEffectView *indicatorBackgroundView = [[%c(SBWallpaperEffectView) alloc] initWithWallpaperVariant:1];
+		SBWallpaperEffectView *indicatorBackgroundView = [[objc_getClass("SBWallpaperEffectView") alloc] initWithWallpaperVariant:1];
 		indicatorBackgroundView.style = 11;
 		indicatorBackgroundView.translatesAutoresizingMaskIntoConstraints = false;
 
@@ -118,19 +117,19 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (void)showIconImagesFromColumn:(NSInteger)arg1 toColumn:(NSInteger)arg2 totalColumns:(NSInteger)arg3 allowAnimations:(BOOL)arg4 {
-	%orig;
+	@orig(arg1, arg2, arg3, arg4);
 }
 
 #pragma mark Layout
 
-%new
+
 - (CGFloat)horizontalIconBounds {
 	return self.bounds.size.width - kHorizontalIconInset * 2;
 }
 
-%new
+
 - (CGFloat)collapsedIconScale {
-	CGFloat normalIconSize = [%c(SBIconView) defaultVisibleIconImageSize].width;
+	CGFloat normalIconSize = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 
 	CGFloat newIconSize = [self horizontalIconBounds] / self.model.numberOfIcons;
 
@@ -141,12 +140,12 @@ static const CGFloat kMaxScale = 1.0;
 	return MIN(newIconSize / normalIconSize, 1);
 }
 
-%new
+
 - (CGFloat)collapsedIconWidth {
-	return [self collapsedIconScale] * [%c(SBIconView) defaultVisibleIconImageSize].width;
+	return [self collapsedIconScale] * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 }
 
-%new
+
 - (CGFloat)scaleForOffsetFromFocusPoint:(CGFloat)offset {
 
 	if (fabs(offset) > kEffectiveRange)
@@ -155,7 +154,7 @@ static const CGFloat kMaxScale = 1.0;
 	return MAX((cos(offset / ((kEffectiveRange) / M_PI)) + 1.0) / (1.0 / (kMaxScale / 2.0)), [self collapsedIconScale]);
 }
 
-%new
+
 - (CGFloat)xTranslationForOffsetFromFocusPoint:(CGFloat)offset {
 
 	if (self.xTranslationDamper == 0)
@@ -164,9 +163,9 @@ static const CGFloat kMaxScale = 1.0;
 	return -(atan(offset / (self.xTranslationDamper * (M_PI / 4))) * ((self.maxTranslationX) / (M_PI / 2)));
 }
 
-%new
+
 - (CGFloat)yTranslationForOffsetFromFocusPoint:(CGFloat)offset {
-	CGFloat evasionDistance = [%c(SBIconView) defaultVisibleIconImageSize].width;
+	CGFloat evasionDistance = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 
 	if (fabs(offset) > kEffectiveRange)
 		return 0;
@@ -175,12 +174,13 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (void)updateEditingStateAnimated:(BOOL)arg1 {
-	%orig;
+	@orig(arg1);
 	[self layoutIconsIfNeeded:0.0 domino:false];
 }
 
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
-	CGFloat defaultWidth = [%c(SBIconView) defaultVisibleIconImageSize].width;
+	
+	CGFloat defaultWidth = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 
 	self.xTranslationDamper = acos((kEffectiveRange * [self collapsedIconScale]) / (kEffectiveRange / 2) - 1) * (kEffectiveRange / M_PI);
 	self.maxTranslationX = 0;
@@ -201,7 +201,7 @@ static const CGFloat kMaxScale = 1.0;
 		offset = [self collapsedIconWidth]; // Set to collapsed icon width, so we skip the center icon on the second run
 	}
 
-	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [%c(SBIconView) defaultVisibleIconImageSize].width) / 2, 0);
+	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width) / 2, 0);
 
 	[UIView animateWithDuration:animationDuration animations:^{
 		for (int i = 0; i < self.model.numberOfIcons; i++) {
@@ -222,7 +222,7 @@ static const CGFloat kMaxScale = 1.0;
 	}];
 }
 
-%new
+
 - (void)updateIconTransforms {
 
 	for (int i = 0; i < self.model.numberOfIcons; i++) {
@@ -249,7 +249,7 @@ static const CGFloat kMaxScale = 1.0;
 
 }
 
-%new
+
 - (void)updateIndicatorForIconView:(SBIconView*)iconView animated:(BOOL)animated {
 
 	if (!iconView) {
@@ -282,8 +282,8 @@ static const CGFloat kMaxScale = 1.0;
 	void (^animations) (void) = ^{
 
 		NSString *text = iconView.icon.displayName;
-		CGFloat evasionDistance = [%c(SBIconView) defaultVisibleIconImageSize].width;
-		CGRect textRect = [text boundingRectWithSize:[%c(SBIconView) maxLabelSize] options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil];
+		CGFloat evasionDistance = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
+		CGRect textRect = [text boundingRectWithSize:[objc_getClass("SBIconView") maxLabelSize] options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil];
 
 		self.indicatorView.bounds = CGRectMake(0, 0, textRect.size.width + 30, textRect.size.height + 30);
 		self.indicatorView.center = CGPointMake(MAX(MIN(iconView.center.x, self.bounds.size.width - self.indicatorView.bounds.size.width / 2), self.indicatorView.bounds.size.width / 2), (self.bounds.size.height / 2) - evasionDistance - self.indicatorView.bounds.size.height - 20.0);
@@ -328,7 +328,7 @@ static const CGFloat kMaxScale = 1.0;
 		iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:self.focusPoint]]];
 	} @catch (NSException *e) { }
 
-	if ([[touches anyObject] locationInView:self].y < 0 && ![[%c(SBIconController) sharedInstance] grabbedIcon] && iconView) {
+	if ([[touches anyObject] locationInView:self].y < 0 && ![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) {
 
 		// get origin, remove transform, restore origin
 		CGPoint origin = iconView.origin;
@@ -337,11 +337,11 @@ static const CGFloat kMaxScale = 1.0;
 
 		// fix frame (somewhere along the way, the size gets set to zero. not exactly sure where)
 		CGRect frame = iconView.frame;
-		frame.size = [%c(SBIconView) defaultIconSize];
+		frame.size = [objc_getClass("SBIconView") defaultIconSize];
 		iconView.frame = frame;
 
 		// set grabbed and begin forwarding touches to icon
-		[[%c(SBIconController) sharedInstance] setGrabbedIcon:iconView.icon];
+		[[objc_getClass("SBIconController") sharedInstance] setGrabbedIcon:iconView.icon];
 		[iconView touchesBegan:touches withEvent:nil];
 		[iconView longPressTimerFired];
 
@@ -350,8 +350,8 @@ static const CGFloat kMaxScale = 1.0;
 		return;
 	}
 
-	if ([[%c(SBIconController) sharedInstance] grabbedIcon]) {
-		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:[[%c(SBIconController) sharedInstance] grabbedIcon]];
+	if ([[objc_getClass("SBIconController") sharedInstance] grabbedIcon]) {
+		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:[[objc_getClass("SBIconController") sharedInstance] grabbedIcon]];
 		[iconView touchesMoved:touches withEvent:nil];
 		return;
 	}
@@ -372,8 +372,8 @@ static const CGFloat kMaxScale = 1.0;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 
 
-	if ([[%c(SBIconController) sharedInstance] grabbedIcon]) {
-		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:[[%c(SBIconController) sharedInstance] grabbedIcon]];
+	if ([[objc_getClass("SBIconController") sharedInstance] grabbedIcon]) {
+		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:[[objc_getClass("SBIconController") sharedInstance] grabbedIcon]];
 		[iconView touchesEnded:touches withEvent:nil];
 		return;
 	}
@@ -404,7 +404,7 @@ static const CGFloat kMaxScale = 1.0;
 
 	[self layoutIconsIfNeeded:0.2 domino:false];
 
-	[[%c(SBIconController) sharedInstance] iconTapped:iconView];
+	[[objc_getClass("SBIconController") sharedInstance] iconTapped:iconView];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -414,21 +414,21 @@ static const CGFloat kMaxScale = 1.0;
 
 #pragma mark -
 
-%new
+
 - (void)collapseAnimated:(BOOL)animated {
 	self.trackingTouch = false;
 	self.activatingIcon = nil;
 	[self layoutIconsIfNeeded:animated ? 0.25 : 0.0 domino:false];
 }
 
-%new
+
 - (NSUInteger)columnAtX:(CGFloat)x {
 	return [self columnAtPoint:CGPointMake(x, 0)];
 }
 
 - (NSUInteger)columnAtPoint:(struct CGPoint)arg1 {
-	CGFloat collapsedItemWidth = [self collapsedIconScale] * [%c(SBIconView) defaultVisibleIconImageSize].width;
-	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [%c(SBIconView) defaultVisibleIconImageSize].width) / 2, 0);
+	CGFloat collapsedItemWidth = [self collapsedIconScale] * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
+	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width) / 2, 0);
 
 	NSUInteger index = floorf((arg1.x - (self.bounds.size.width - [self horizontalIconBounds]) / 2 - xOffset) / collapsedItemWidth);
 
@@ -436,24 +436,24 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (void)removeIconAtIndex:(NSUInteger)arg1 {
-	%orig;
+	@orig(arg1);
 	[self collapseAnimated:true];
 }
 
-%end
+@end
 
 #pragma mark Animators
 
-%hook SBIconFadeAnimator
+@hook SBIconFadeAnimator
 
 - (void)_cleanupAnimation {
-	%orig;
-	[[[%c(SBIconController) sharedInstance] dockListView] collapseAnimated:true];
+	@orig();
+	[[[objc_getClass("SBIconController") sharedInstance] dockListView] collapseAnimated:true];
 }
 
-%end
+@end
 
-%hook SBScaleIconZoomAnimator
+@hook SBScaleIconZoomAnimator
 
 - (void)enumerateIconsAndIconViewsWithHandler:(void (^) (id animator, SBIconView *iconView, BOOL inDock))arg1 {
 	// Prevent this method from changing the origins and transforms of the dock icons
@@ -462,7 +462,7 @@ static const CGFloat kMaxScale = 1.0;
 - (void)_prepareAnimation {
 	// Focus dock on animation target icon
 
-	SBDockIconListView *dockListView = [[%c(SBIconController) sharedInstance] dockListView];
+	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];
 	SBIconView *targetIconView = [dockListView.viewMap mappedIconViewForIcon:self.targetIcon];
 
 	if ([targetIconView isInDock]) {
@@ -472,12 +472,12 @@ static const CGFloat kMaxScale = 1.0;
 		[dockListView layoutIconsIfNeeded:0.0 domino:false];
 	}
 
-	%orig;
+	@orig();
 }
 
 - (void)_cleanupAnimation {
-	%orig;
+	@orig();
 	[self.dockListView collapseAnimated:true];
 }
 
-%end
+@end
