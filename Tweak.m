@@ -459,6 +459,14 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)enumerateIconsAndIconViewsWithHandler:(void (^) (id animator, SBIconView *iconView, BOOL inDock))arg1 {
 	// Prevent this method from changing the origins and transforms of the dock icons
+	
+	NSMapTable *mapHolder = _dockIconToViewMap;
+	_dockIconToViewMap = nil;
+
+	@orig(arg1);
+
+	_dockIconToViewMap = mapHolder;
+
 }
 
 - (void)_prepareAnimation {
