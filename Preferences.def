@@ -1,0 +1,32 @@
+
+#ifndef PREF
+#define PREF(TYPE, NAME, DEFAULT, LABEL, CELL_TYPE, ...)
+#endif
+
+#ifndef GROUP
+#define GROUP(TITLE, FOOTER)
+#endif
+
+#define is_iPad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+
+PREF(NSNumber*, enabled, @(true), @"Enabled", PSSwitchCell, )
+
+GROUP("Icon Inset", "")
+
+PREF(NSNumber*, iconInset, is_iPad ? @(30.0) : @(15.0), @"Icon Inset", PSSliderCell, @"showValue" : @(true), @"min" : @(0.1), @"max" : is_iPad ? @(120.0) : @(60.0))
+
+GROUP("Evasion Distance", "")
+
+PREF(NSNumber*, evasionDistance, is_iPad ? @(120.0) : @(60.0), @"Evasion Distance", PSSliderCell, @"showValue" : @(true), @"min" : @(0.1), @"max" : is_iPad ? @(240.0) : @(120.0))
+
+GROUP("Effective Range", "")
+
+PREF(NSNumber*, effectiveRange, is_iPad ? @(200.0) : @(60.0), @"Effective Range", PSSliderCell, @"showValue" : @(true), @"min" : @(0.1), @"max" : is_iPad ? @(400.0) : @(120.0))
+
+GROUP("", "")
+
+PREF(NSNumber*, showIndicator, @(true), @"Show App Indicator", PSSwitchCell, )
+PREF(NSNumber*, showStateIndicator, @(true), @"Show App State Dot", PSSwitchCell, )
+
+#undef PREF
+#undef GROUP

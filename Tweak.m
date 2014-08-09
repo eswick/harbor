@@ -13,6 +13,8 @@
 #import "SBUIAnimationZoomUpAppFromHome.h"
 #import "SBIconFadeAnimator.h"
 
+#import "HBPreferences.h"
+
 #pragma mark Declarations
 
 @interface SBDockIconListView ()
@@ -45,10 +47,8 @@
 
 #pragma mark Constants
 
-static const CGFloat kHorizontalIconInset = 15.0;
 static const CGFloat kCancelGestureRange = 10.0;
 
-static const CGFloat kEffectiveRange = 60.0;
 static const CGFloat kMaxScale = 1.0;
 
 #pragma mark -
@@ -67,6 +67,8 @@ static const CGFloat kMaxScale = 1.0;
 @synthesize focusedIconView;
 
 + (NSUInteger)iconColumnsForInterfaceOrientation:(NSInteger)arg1{
+	if (![[prefs getenabled] boolValue])
+		return @orig(arg1);
 	return 100;
 }
 
@@ -118,15 +120,11 @@ static const CGFloat kMaxScale = 1.0;
 	return self;
 }
 
-- (void)showIconImagesFromColumn:(NSInteger)arg1 toColumn:(NSInteger)arg2 totalColumns:(NSInteger)arg3 allowAnimations:(BOOL)arg4 {
-	@orig(arg1, arg2, arg3, arg4);
-}
-
 #pragma mark Layout
 
 
 - (CGFloat)horizontalIconBounds {
-	return self.bounds.size.width - kHorizontalIconInset * 2;
+	return self.bounds.size.width - [[prefs geticonInset] floatValue] * 2;
 }
 
 
@@ -150,10 +148,10 @@ static const CGFloat kMaxScale = 1.0;
 
 - (CGFloat)scaleForOffsetFromFocusPoint:(CGFloat)offset {
 
-	if (fabs(offset) > kEffectiveRange)
+	if (fabs(offset) > [[prefs geteffectiveRange] doubleValue])
 		return [self collapsedIconScale];
 
-	return MAX((cos(offset / ((kEffectiveRange) / M_PI)) + 1.0) / (1.0 / (kMaxScale / 2.0)), [self collapsedIconScale]);
+	return MAX((cos(offset / (([[prefs geteffectiveRange] doubleValue]) / M_PI)) + 1.0) / (1.0 / (kMaxScale / 2.0)), [self collapsedIconScale]);
 }
 
 
@@ -167,29 +165,35 @@ static const CGFloat kMaxScale = 1.0;
 
 
 - (CGFloat)yTranslationForOffsetFromFocusPoint:(CGFloat)offset {
-	CGFloat evasionDistance = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 
-	if (fabs(offset) > kEffectiveRange)
+	if (fabs(offset) > [[prefs geteffectiveRange] doubleValue])
 		return 0;
 
-	return -((cos(offset / ((kEffectiveRange) / M_PI)) + 1.0) / (1.0 / (evasionDistance / 2.0)));
+	return -((cos(offset / (([[prefs geteffectiveRange] doubleValue]) / M_PI)) + 1.0) / (1.0 / ([[prefs getevasionDistance] doubleValue] / 2.0)));
 }
 
 - (void)updateEditingStateAnimated:(BOOL)arg1 {
 	@orig(arg1);
+	if (![[prefs getenabled] boolValue])
+		return;
 	[self layoutIconsIfNeeded:0.0 domino:false];
 }
 
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
 
+	if (![[prefs getenabled] boolValue]) {
+		@orig(animationDuration, arg2);
+		return;
+	}
+
 	CGFloat defaultWidth = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 
-	self.xTranslationDamper = acos((kEffectiveRange * [self collapsedIconScale]) / (kEffectiveRange / 2) - 1) * (kEffectiveRange / M_PI);
+	self.xTranslationDamper = acos(([[prefs geteffectiveRange] doubleValue] * [self collapsedIconScale]) / ([[prefs geteffectiveRange] doubleValue] / 2) - 1) * ([[prefs geteffectiveRange] doubleValue] / M_PI);
 	self.maxTranslationX = 0;
 
 	// Calculate total X translation
 
-	int iconsInRange = (int)floor(kEffectiveRange / [self collapsedIconWidth]);
+	int iconsInRange = (int)floor([[prefs geteffectiveRange] doubleValue] / [self collapsedIconWidth]);
 	float offset = 0;
 
 	for (int i = 0; i < 2; i++) {
@@ -254,6 +258,11 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)updateIndicatorForIconView:(SBIconView*)iconView animated:(BOOL)animated {
 
+	if (![[prefs getshowIndicator] boolValue]) {
+		self.indicatorView.hidden = true;
+		return;
+	}
+
 	if (!iconView) {
 
 		if (animated) {
@@ -284,11 +293,10 @@ static const CGFloat kMaxScale = 1.0;
 	void (^animations) (void) = ^{
 
 		NSString *text = iconView.icon.displayName;
-		CGFloat evasionDistance = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 		CGRect textRect = [text boundingRectWithSize:[objc_getClass("SBIconView") maxLabelSize] options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil];
 
 		self.indicatorView.bounds = CGRectMake(0, 0, textRect.size.width + 30, textRect.size.height + 30);
-		self.indicatorView.center = CGPointMake(MAX(MIN(iconView.center.x, self.bounds.size.width - self.indicatorView.bounds.size.width / 2), self.indicatorView.bounds.size.width / 2), (self.bounds.size.height / 2) - evasionDistance - self.indicatorView.bounds.size.height - 20.0);
+		self.indicatorView.center = CGPointMake(MAX(MIN(iconView.center.x, self.bounds.size.width - self.indicatorView.bounds.size.width / 2), self.indicatorView.bounds.size.width / 2), (self.bounds.size.height / 2) - [[prefs getevasionDistance] doubleValue] - self.indicatorView.bounds.size.height - 20.0);
 
 		self.indicatorLabel.text = text;
 		self.indicatorLabel.bounds = textRect;
@@ -450,6 +458,8 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)_cleanupAnimation {
 	@orig();
+	if (![[prefs getenabled] boolValue])
+		return;
 	[[[objc_getClass("SBIconController") sharedInstance] dockListView] collapseAnimated:true];
 }
 
@@ -458,8 +468,14 @@ static const CGFloat kMaxScale = 1.0;
 @hook SBScaleIconZoomAnimator
 
 - (void)enumerateIconsAndIconViewsWithHandler:(void (^) (id animator, SBIconView *iconView, BOOL inDock))arg1 {
+
+	if (![[prefs getenabled] boolValue]) {
+		@orig(arg1);
+		return;
+	}
+
 	// Prevent this method from changing the origins and transforms of the dock icons
-	
+
 	NSMapTable *mapHolder = _dockIconToViewMap;
 	_dockIconToViewMap = nil;
 
@@ -470,6 +486,11 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (void)_prepareAnimation {
+	if (![[prefs getenabled] boolValue]) {
+		@orig();
+		return;
+	}
+
 	// Focus dock on animation target icon
 
 	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];
@@ -487,6 +508,8 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)_cleanupAnimation {
 	@orig();
+	if (![[prefs getenabled] boolValue])
+		return;
 	[self.dockListView collapseAnimated:true];
 }
 

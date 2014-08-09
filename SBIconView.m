@@ -9,6 +9,8 @@
 #import "SBIconViewMap.h"
 #import "SBIconLabelView.h"
 
+#import "HBPreferences.h"
+
 @interface SBIconView ()
 
 @property (nonatomic, retain) UIView *indicatorView;
@@ -39,6 +41,12 @@
 }
 
 - (void)updateIndicatorVisibility {
+
+	if (![[prefs getshowStateIndicator] boolValue]) {
+		self.indicatorView.hidden = true;
+		return;
+	}
+
 	BOOL applicationRunning = false;
 
 	if ([self.icon isKindOfClass:objc_getClass("SBApplicationIcon")]) {
@@ -52,6 +60,13 @@
 }
 
 - (void)layoutSubviews {
+	if (![[prefs getenabled] boolValue]) {
+		@orig();
+		_labelView.hidden = false;
+		self.indicatorView.hidden = true;
+		return;
+	}
+
 	@orig();
 	[self updateIndicatorVisibility];
 
@@ -67,24 +82,44 @@
 #define super(...) ({ struct objc_super superInfo = { self, [UIView class] }; objc_msgSendSuper(&superInfo, _cmd, __VA_ARGS__); })
 
 - (void)touchesEnded:(id)arg1 withEvent:(id)arg2{
+	if (![[prefs getenabled] boolValue]) {
+		@orig(arg1, arg2);
+		return;
+	}
+
 	if ([self isInDock] && !self.isGrabbed)
 		super(arg1, arg2);
 	else
 		@orig(arg1, arg2);
 }
 - (void)touchesMoved:(id)arg1 withEvent:(id)arg2{
+	if (![[prefs getenabled] boolValue]) {
+		@orig(arg1, arg2);
+		return;
+	}
+
 	if ([self isInDock] && !self.isGrabbed)
 		super(arg1, arg2);
 	else
 		@orig(arg1, arg2);
 }
 - (void)touchesBegan:(id)arg1 withEvent:(id)arg2{
+	if (![[prefs getenabled] boolValue]) {
+		@orig(arg1, arg2);
+		return;
+	}
+
 	if ([self isInDock] && !self.isGrabbed)
 		super(arg1, arg2);
 	else
 		@orig(arg1, arg2);
 }
 - (void)touchesCancelled:(id)arg1 withEvent:(id)arg2{
+	if (![[prefs getenabled] boolValue]) {
+		@orig(arg1, arg2);
+		return;
+	}
+
 	if ([self isInDock] && !self.isGrabbed)
 		super(arg1, arg2);
 	else
