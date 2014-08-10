@@ -12,6 +12,7 @@
 #import "SBWallpaperEffectView.h"
 #import "SBUIAnimationZoomUpAppFromHome.h"
 #import "SBIconFadeAnimator.h"
+#import "SBDockView.h"
 
 #import "HBPreferences.h"
 
@@ -511,6 +512,15 @@ static const CGFloat kMaxScale = 1.0;
 	if (![[prefs getenabled] boolValue])
 		return;
 	[self.dockListView collapseAnimated:true];
+}
+
+@end
+
+@hook SBDockView
+
+- (void)layoutSubviews {
+	@orig();
+	[self sendSubviewToBack:_highlightView];
 }
 
 @end
