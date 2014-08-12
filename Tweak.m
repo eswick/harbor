@@ -46,6 +46,13 @@
 
 @end
 
+@interface SBDockView ()
+
+@new
+- (void)layoutBackgroundView;
+
+@end
+
 #pragma mark Constants
 
 static const CGFloat kCancelGestureRange = 10.0;
@@ -227,6 +234,17 @@ static const CGFloat kMaxScale = 1.0;
 
 		[self updateIconTransforms];
 	}];
+
+	if ([self.superview isKindOfClass:objc_getClass("SBDockView")]) {
+		[CATransaction begin];
+		[CATransaction setValue:@(animationDuration) forKey:kCATransactionAnimationDuration];
+		[CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+
+		[(SBDockView*)self.superview layoutBackgroundView];
+
+		[CATransaction commit];
+	}
+
 }
 
 
@@ -520,7 +538,33 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)layoutSubviews {
 	@orig();
-	[self sendSubviewToBack:_highlightView];
+	_highlightView.hidden = true;
+	[self layoutBackgroundView];
+}
+
+- (void)layoutBackgroundView {
+
+	UIView *firstIcon = [_iconListView.viewMap mappedIconViewForIcon:[_iconListView.model.icons firstObject]];
+	UIView *lastIcon = [_iconListView.viewMap mappedIconViewForIcon:[_iconListView.model.icons lastObject]];
+
+	CGFloat backgroundMargin = 25.0;
+
+	CGRect frame = CGRectZero;
+
+	frame.size.width = (CGRectGetMaxX(lastIcon.frame) - CGRectGetMinX(firstIcon.frame)) + backgroundMargin;
+	frame.size.height = [_iconListView collapsedIconWidth] + backgroundMargin;
+	frame.origin.x = CGRectGetMinX(firstIcon.frame) - backgroundMargin / 2;
+	frame.origin.y = (_iconListView.frame.size.height / 2) - (backgroundMargin / 2) - ([_iconListView collapsedIconWidth] / 2);
+
+	if (!_backgroundView.layer.mask) {
+		_backgroundView.layer.mask = [CALayer layer];
+		_backgroundView.layer.mask.cornerRadius = 5.0;
+		_backgroundView.layer.mask.anchorPoint = CGPointMake(0.0, 0.0);
+		_backgroundView.layer.mask.backgroundColor = [[UIColor blackColor] CGColor];
+	}
+
+	_backgroundView.layer.mask.frame = frame;
+
 }
 
 @end

@@ -1,4 +1,4 @@
-export ARCHS = armv7
+export ARCHS = armv7 arm64
 
 export TARGET_CXX = /Users/eswick/Development/llvm_build/Debug+Asserts/bin/clang
 
@@ -11,7 +11,7 @@ BubbleDock_FILES += Tweak.m SBIconView.m HBPreferences.m
 BubbleDock_FILES += extensions/UIView+Origin.m
 
 BubbleDock_CFLAGS += -Iinclude -Iextensions -fobjc-logos -Wno-objc-missing-super-calls
-BubbleDock_FRAMEWORKS += CoreGraphics UIKit
+BubbleDock_FRAMEWORKS += CoreGraphics UIKit QuartzCore
 BubbleDock_PRIVATE_FRAMEWORKS += SpringBoardFoundation
 
 include $(THEOS_MAKE_PATH)/tweak.mk
