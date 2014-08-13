@@ -228,6 +228,8 @@ static const CGFloat kMaxScale = 1.0;
 			SBIcon *icon = self.model.icons[i];
 			SBIconView *iconView = [self.viewMap mappedIconViewForIcon:icon];
 
+			[self sendSubviewToBack:iconView];
+
 			iconView.location = [self iconLocation];
 
 			CGPoint center = CGPointZero;
