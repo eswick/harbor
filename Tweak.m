@@ -38,6 +38,7 @@
 - (CGFloat)scaleForOffsetFromFocusPoint:(CGFloat)offset;
 - (CGFloat)yTranslationForOffsetFromFocusPoint:(CGFloat)offset;
 - (CGFloat)xTranslationForOffsetFromFocusPoint:(CGFloat)offset;
+- (CGFloat)iconCenterY;
 - (NSUInteger)columnAtX:(CGFloat)x;
 
 - (void)updateIconTransforms;
@@ -187,6 +188,10 @@ static const CGFloat kMaxScale = 1.0;
 	[self layoutIconsIfNeeded:0.0 domino:false];
 }
 
+- (CGFloat)iconCenterY {
+	return self.bounds.size.height - [self collapsedIconWidth] / 2 - 10.0;
+}
+
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
 
 	if (![[prefs getenabled] boolValue]) {
@@ -227,7 +232,7 @@ static const CGFloat kMaxScale = 1.0;
 
 			CGPoint center = CGPointZero;
 			center.x = xOffset + ([self collapsedIconWidth] * i) + ([self collapsedIconWidth] / 2) + (self.bounds.size.width - [self horizontalIconBounds]) / 2;
-			center.y = self.bounds.size.height / 2;
+			center.y = [self iconCenterY];
 
 			iconView.center = center;
 		}
@@ -554,12 +559,11 @@ static const CGFloat kMaxScale = 1.0;
 	frame.size.width = (CGRectGetMaxX(lastIcon.frame) - CGRectGetMinX(firstIcon.frame)) + backgroundMargin;
 	frame.size.height = [_iconListView collapsedIconWidth] + backgroundMargin;
 	frame.origin.x = CGRectGetMinX(firstIcon.frame) - backgroundMargin / 2;
-	frame.origin.y = (_iconListView.frame.size.height / 2) - (backgroundMargin / 2) - ([_iconListView collapsedIconWidth] / 2);
+	frame.origin.y = ([_iconListView iconCenterY]) - (backgroundMargin / 2) - ([_iconListView collapsedIconWidth] / 2);
 
 	if (!_backgroundView.layer.mask) {
-		_backgroundView.layer.mask = [CALayer layer];
+		_backgroundView.layer.mask = [CAShapeLayer layer];
 		_backgroundView.layer.mask.cornerRadius = 5.0;
-		_backgroundView.layer.mask.anchorPoint = CGPointMake(0.0, 0.0);
 		_backgroundView.layer.mask.backgroundColor = [[UIColor blackColor] CGColor];
 	}
 
