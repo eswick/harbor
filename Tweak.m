@@ -160,7 +160,7 @@ static const CGFloat kMaxScale = 1.0;
 	if (fabs(offset) > [[prefs geteffectiveRange] doubleValue])
 		return [self collapsedIconScale];
 
-	return MAX((cos(offset / (([[prefs geteffectiveRange] doubleValue]) / M_PI)) + 1.0) / (1.0 / (kMaxScale / 2.0)), [self collapsedIconScale]);
+	return MAX((cos(offset / (([[prefs geteffectiveRange] doubleValue]) / M_PI)) + 1.0) / (1.0 / ((kMaxScale - [self collapsedIconScale]) / 2.0)) + [self collapsedIconScale], [self collapsedIconScale]);
 }
 
 
