@@ -31,12 +31,12 @@ NSArray* SpecifiersFromPlist (
 
 #include "Preferences.def"
 
-
 - (id)specifiers {
 
 	if (_specifiers == nil) {
 
 		NSDictionary *plist = @{
+      @"title" : @"Harbor",
 			@"items" : @[
 
 				#define GROUP(TITLE, FOOTER) @{ \

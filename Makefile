@@ -6,13 +6,13 @@ TARGET=iphone:7.1
 
 include theos/makefiles/common.mk
 
-TWEAK_NAME = BubbleDock
-BubbleDock_FILES += Tweak.m SBIconView.m HBPreferences.m
-BubbleDock_FILES += extensions/UIView+Origin.m
+TWEAK_NAME = Harbor
+Harbor_FILES += Tweak.m SBIconView.m HBPreferences.m
+Harbor_FILES += extensions/UIView+Origin.m
 
-BubbleDock_CFLAGS += -Iinclude -Iextensions -fobjc-logos -Wno-objc-missing-super-calls
-BubbleDock_FRAMEWORKS += CoreGraphics UIKit QuartzCore
-BubbleDock_PRIVATE_FRAMEWORKS += SpringBoardFoundation
+Harbor_CFLAGS += -Iinclude -Iextensions -fobjc-logos -Wno-objc-missing-super-calls
+Harbor_FRAMEWORKS += CoreGraphics UIKit QuartzCore
+Harbor_PRIVATE_FRAMEWORKS += SpringBoardFoundation
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
