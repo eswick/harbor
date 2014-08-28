@@ -189,7 +189,13 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (CGFloat)iconCenterY {
-	return self.bounds.size.height - [self collapsedIconWidth] / 2 - 10.0;
+
+	if ([[prefs getflushWithBottom] boolValue]) {
+		return self.bounds.size.height - [self collapsedIconWidth] / 2 - 10.0;
+	} else {
+		return self.bounds.size.height / 2;
+	}
+
 }
 
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
