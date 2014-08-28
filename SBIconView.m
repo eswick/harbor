@@ -79,7 +79,7 @@
 
 #pragma mark Touch Handling
 
-#define super(...) ({ struct objc_super superInfo = { self, [UIView class] }; objc_msgSendSuper(&superInfo, _cmd, __VA_ARGS__); })
+#define super(...) ({ struct objc_super superInfo = { self, objc_getClass("UIView") }; ((void(*)(struct objc_super*,SEL,id,id))objc_msgSendSuper)(&superInfo, _cmd, __VA_ARGS__); })
 
 - (void)touchesEnded:(id)arg1 withEvent:(id)arg2{
 	if (![[prefs getenabled] boolValue]) {
@@ -92,6 +92,7 @@
 	else
 		@orig(arg1, arg2);
 }
+
 - (void)touchesMoved:(id)arg1 withEvent:(id)arg2{
 	if (![[prefs getenabled] boolValue]) {
 		@orig(arg1, arg2);
@@ -103,6 +104,7 @@
 	else
 		@orig(arg1, arg2);
 }
+
 - (void)touchesBegan:(id)arg1 withEvent:(id)arg2{
 	if (![[prefs getenabled] boolValue]) {
 		@orig(arg1, arg2);
@@ -114,6 +116,7 @@
 	else
 		@orig(arg1, arg2);
 }
+
 - (void)touchesCancelled:(id)arg1 withEvent:(id)arg2{
 	if (![[prefs getenabled] boolValue]) {
 		@orig(arg1, arg2);
