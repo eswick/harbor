@@ -258,6 +258,10 @@ static const CGFloat kMaxScale = 1.0;
 		[CATransaction commit];
 	}
 
+	if (self.activatingIcon) {
+		[self bringSubviewToFront:self.activatingIcon];
+	}
+
 }
 
 
