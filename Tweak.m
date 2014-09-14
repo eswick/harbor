@@ -16,6 +16,8 @@
 
 #import "HBPreferences.h"
 
+#import <mach_verify/mach_verify.h>
+
 #pragma mark Declarations
 
 @interface SBDockIconListView ()
@@ -82,6 +84,7 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (id)initWithModel:(id)arg1 orientation:(NSInteger)arg2 viewMap:(id)arg3 {
+	VERIFY_START(initWithModel_orientation_viewMap);
 	self = @orig(arg1, arg2, arg3);
 	if (self) {
 
@@ -126,6 +129,9 @@ static const CGFloat kMaxScale = 1.0;
 		[self.indicatorView release];
 
 	}
+
+	VERIFY_STOP(initWithModel_orientation_viewMap);
+
 	return self;
 }
 
@@ -182,10 +188,12 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (void)updateEditingStateAnimated:(BOOL)arg1 {
+	VERIFY_START(updateEditingStateAnimated);
 	@orig(arg1);
 	if (![[prefs getenabled] boolValue])
 		return;
 	[self layoutIconsIfNeeded:0.0 domino:false];
+	VERIFY_STOP(updateEditingStateAnimated);
 }
 
 - (CGFloat)iconCenterY {
@@ -294,6 +302,8 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)updateIndicatorForIconView:(SBIconView*)iconView animated:(BOOL)animated {
 
+	VERIFY_START(updateIndicatorForIconView_animated);
+
 	if (![[prefs getshowIndicator] boolValue]) {
 		self.indicatorView.hidden = true;
 		return;
@@ -344,11 +354,16 @@ static const CGFloat kMaxScale = 1.0;
 		[UIView animateWithDuration:0.1 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:animations completion:nil];
 	else
 		animations();
+
+	VERIFY_STOP(updateIndicatorForIconView_animated);
 }
 
 #pragma mark Touch Handling
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+
+	VERIFY_START(touchesBegan_withEvent);
+
 	self.trackingTouch = true;
 	self.focusPoint = [[touches anyObject] locationInView:self].x;
 	self.activatingIcon = nil;
@@ -363,6 +378,8 @@ static const CGFloat kMaxScale = 1.0;
 	}@catch (NSException *exception) { }
 
 	[self updateIndicatorForIconView:focusedIcon animated:false];
+
+	VERIFY_STOP(touchesBegan_withEvent);
 }
 
 
@@ -417,6 +434,7 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 
+	VERIFY_START(touchesEnded_withEvent);
 
 	if ([[objc_getClass("SBIconController") sharedInstance] grabbedIcon]) {
 		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:[[objc_getClass("SBIconController") sharedInstance] grabbedIcon]];
@@ -451,20 +469,32 @@ static const CGFloat kMaxScale = 1.0;
 	[self layoutIconsIfNeeded:0.2 domino:false];
 
 	[[objc_getClass("SBIconController") sharedInstance] iconTapped:iconView];
+
+	VERIFY_STOP(touchesEnded_withEvent);
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+
+	VERIFY_START(touchesCancelled_withEvent);
+
 	self.trackingTouch = false;
 	[self layoutIconsIfNeeded:0 domino:false];
+
+	VERIFY_STOP(touchesCancelled_withEvent);
 }
 
 #pragma mark -
 
 
 - (void)collapseAnimated:(BOOL)animated {
+
+	VERIFY_START(collapseAnimated);
+
 	self.trackingTouch = false;
 	self.activatingIcon = nil;
 	[self layoutIconsIfNeeded:animated ? 0.25 : 0.0 domino:false];
+
+	VERIFY_STOP(collapseAnimated);
 }
 
 
@@ -482,8 +512,13 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (void)removeIconAtIndex:(NSUInteger)arg1 {
+
+	VERIFY_START(removeIconAtIndex);
+
 	@orig(arg1);
 	[self collapseAnimated:true];
+
+	VERIFY_STOP(removeIconAtIndex);
 }
 
 @end
@@ -493,10 +528,15 @@ static const CGFloat kMaxScale = 1.0;
 @hook SBIconFadeAnimator
 
 - (void)_cleanupAnimation {
+
+	VERIFY_START(_cleanupAnimation);
+
 	@orig();
 	if (![[prefs getenabled] boolValue])
 		return;
 	[[[objc_getClass("SBIconController") sharedInstance] dockListView] collapseAnimated:true];
+
+	VERIFY_STOP(_cleanupAnimation);
 }
 
 @end
@@ -504,6 +544,8 @@ static const CGFloat kMaxScale = 1.0;
 @hook SBScaleIconZoomAnimator
 
 - (void)enumerateIconsAndIconViewsWithHandler:(void (^) (id animator, SBIconView *iconView, BOOL inDock))arg1 {
+
+	VERIFY_START(enumerateIconsAndIconViewsWithHandler);
 
 	if (![[prefs getenabled] boolValue]) {
 		@orig(arg1);
@@ -519,9 +561,12 @@ static const CGFloat kMaxScale = 1.0;
 
 	_dockIconToViewMap = mapHolder;
 
+	VERIFY_STOP(enumerateIconsAndIconViewsWithHandler);
 }
 
 - (void)_prepareAnimation {
+	VERIFY_START(_prepareAnimation);
+
 	if (![[prefs getenabled] boolValue]) {
 		@orig();
 		return;
@@ -540,13 +585,19 @@ static const CGFloat kMaxScale = 1.0;
 	}
 
 	@orig();
+
+	VERIFY_STOP(_prepareAnimation);
 }
 
 - (void)_cleanupAnimation {
+	VERIFY_START(_cleanupAnimation);
+
 	@orig();
 	if (![[prefs getenabled] boolValue])
 		return;
 	[self.dockListView collapseAnimated:true];
+
+	VERIFY_STOP(_cleanupAnimation);
 }
 
 @end

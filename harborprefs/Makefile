@@ -1,12 +1,17 @@
 include theos/makefiles/common.mk
 
+
 BUNDLE_NAME = harborprefs
-harborprefs_FILES = harborprefs.m ../HBPreferences.m
+
+export VERSION=1.0.0
+harborprefs_CFLAGS += -DVERSION=\"$(VERSION)\"
+
+harborprefs_FILES += harborprefs.m ../HBPreferences.m ../Installer.xm
 harborprefs_INSTALL_PATH = /Library/PreferenceBundles
-harborprefs_FRAMEWORKS = UIKit
-harborprefs_PRIVATE_FRAMEWORKS = Preferences
-harborprefs_CFLAGS = -I.. -fobjc-logos
-harborprefs_LIBRARIES = substrate
+harborprefs_FRAMEWORKS += UIKit
+harborprefs_PRIVATE_FRAMEWORKS += Preferences
+harborprefs_CFLAGS += -I.. -fobjc-logos
+harborprefs_LIBRARIES += substrate
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 
