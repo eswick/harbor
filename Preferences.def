@@ -25,7 +25,7 @@ PREF(NSNumber*, effectiveRange, is_iPad ? @(200.0) : @(60.0), @"Effective Range"
 
 GROUP("", "")
 
-PREF(NSNumber*, flushWithBottom, true, @"Flush With Screen Bottom", PSSwitchCell, )
+PREF(NSNumber*, flushWithBottom, @(true), @"Flush With Screen Bottom", PSSwitchCell, )
 PREF(NSNumber*, showIndicator, @(true), @"Show App Indicator", PSSwitchCell, )
 PREF(NSNumber*, showStateIndicator, @(true), @"Show App State Dot", PSSwitchCell, )
 
