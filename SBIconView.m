@@ -138,7 +138,7 @@
 - (void)_setActivationState:(int)arg1 {
 	@orig(arg1);
 
-	SBIcon *icon = [[[objc_getClass("SBIconController") sharedInstance] model] applicationIconForDisplayIdentifier:self.displayIdentifier];
+	SBIcon *icon = [[[objc_getClass("SBIconController") sharedInstance] model] applicationIconForBundleIdentifier:self.bundleIdentifier];
 	SBIconView *iconView = [[[[objc_getClass("SBIconController") sharedInstance] dockListView] viewMap] mappedIconViewForIcon:icon];
 
 	[iconView updateIndicatorVisibility];

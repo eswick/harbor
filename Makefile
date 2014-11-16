@@ -2,13 +2,13 @@ export ARCHS = armv7 arm64
 
 export TARGET_CXX = /Users/eswick/Development/llvm_build/Debug+Asserts/bin/clang
 
-TARGET=iphone:7.1
+TARGET=iphone:8.1
 
 include theos/makefiles/common.mk
 
 #ENCRYPT=1
-#INSTALL_LOCAL=1
-#MAKE_SOURCE_DYLIB=1
+INSTALL_LOCAL=1
+MAKE_SOURCE_DYLIB=1
 
 TWEAK_NAME = Harbor
 
@@ -24,6 +24,7 @@ Harbor_FRAMEWORKS += CoreGraphics UIKit QuartzCore
 Harbor_PRIVATE_FRAMEWORKS += SpringBoardFoundation
 else
 Harbor_FILES = Installer.xm
+Harbor_CFLAGS += -Wno-deprecated-declarations
 Harbor_FRAMEWORKS += UIKit
 Harbor_LIBRARIES = MobileGestalt
 endif

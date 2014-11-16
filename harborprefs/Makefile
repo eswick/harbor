@@ -10,7 +10,7 @@ harborprefs_FILES += harborprefs.m ../HBPreferences.m ../Installer.xm
 harborprefs_INSTALL_PATH = /Library/PreferenceBundles
 harborprefs_FRAMEWORKS += UIKit
 harborprefs_PRIVATE_FRAMEWORKS += Preferences
-harborprefs_CFLAGS += -I.. -fobjc-logos
+harborprefs_CFLAGS += -I.. -fobjc-logos -Wno-deprecated-declarations
 harborprefs_LIBRARIES += substrate
 
 include $(THEOS_MAKE_PATH)/bundle.mk

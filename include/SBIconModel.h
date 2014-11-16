@@ -50,7 +50,7 @@
 - (id)_unarchiveRootFolder;
 - (id)_iconState;
 - (id)iconState;
-- (id)applicationIconForDisplayIdentifier:(id)arg1;
+- (id)applicationIconForBundleIdentifier:(id)arg1;
 - (id)leafIconForIdentifier:(id)arg1;
 - (id)expectedIconForDisplayIdentifier:(id)arg1;
 - (id)_applicationIcons;

@@ -59,8 +59,8 @@
 	UIActivityIndicatorView *loading = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
 	[loading startAnimating];
 
-	MSHookIvar<UIView*>(self.alertView, "_accessoryView") = loading;
-	[self.alertView show];
+	//MSHookIvar<UIView*>(self.alertView, "_accessoryView") = loading;
+	//[self.alertView show];
 
 
 	/* get arch */

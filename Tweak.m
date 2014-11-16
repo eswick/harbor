@@ -20,6 +20,8 @@
 
 #pragma mark Declarations
 
+#define icon_animation_duration 0.5
+
 @interface SBDockIconListView ()
 
 @property (nonatomic, assign) CGFloat focusPoint;
@@ -237,6 +239,7 @@ static const CGFloat kMaxScale = 1.0;
 	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width) / 2, 0);
 
 	[UIView animateWithDuration:animationDuration animations:^{
+
 		for (int i = 0; i < self.model.numberOfIcons; i++) {
 
 			SBIcon *icon = self.model.icons[i];
@@ -293,8 +296,15 @@ static const CGFloat kMaxScale = 1.0;
 			tx = [self xTranslationForOffsetFromFocusPoint:offsetFromFocusPoint];
 		}
 
+		CGPoint center = iconView.center;
 
-		iconView.transform = CGAffineTransformConcat(CGAffineTransformMakeScale(scale, scale), CGAffineTransformMakeTranslation(tx, ty));
+		center.x += tx;
+		center.y += ty;
+
+		iconView.center = center;
+
+		iconView.transform = CGAffineTransformMakeScale(scale, scale);
+
 	}
 
 }
@@ -351,7 +361,7 @@ static const CGFloat kMaxScale = 1.0;
 	};
 
 	if (animated)
-		[UIView animateWithDuration:0.1 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:animations completion:nil];
+		[UIView animateWithDuration:0.1 animations:animations completion:nil];
 	else
 		animations();
 
@@ -368,7 +378,7 @@ static const CGFloat kMaxScale = 1.0;
 	self.focusPoint = [[touches anyObject] locationInView:self].x;
 	self.activatingIcon = nil;
 
-	[self layoutIconsIfNeeded:0.25 domino:false];
+	[self layoutIconsIfNeeded:icon_animation_duration domino:false];
 
 	// Update indicator
 	SBIconView *focusedIcon = nil;
@@ -466,7 +476,7 @@ static const CGFloat kMaxScale = 1.0;
 	self.activatingIcon = iconView;
 	self.focusPoint = iconView.center.x;
 
-	[self layoutIconsIfNeeded:0.2 domino:false];
+	[self layoutIconsIfNeeded:icon_animation_duration domino:false];
 
 	[[objc_getClass("SBIconController") sharedInstance] iconTapped:iconView];
 
@@ -492,7 +502,7 @@ static const CGFloat kMaxScale = 1.0;
 
 	self.trackingTouch = false;
 	self.activatingIcon = nil;
-	[self layoutIconsIfNeeded:animated ? 0.25 : 0.0 domino:false];
+	[self layoutIconsIfNeeded:animated ? icon_animation_duration : 0.0 domino:false];
 
 	VERIFY_STOP(collapseAnimated);
 }
