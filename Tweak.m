@@ -13,6 +13,9 @@
 #import "SBUIAnimationZoomUpAppFromHome.h"
 #import "SBIconFadeAnimator.h"
 #import "SBDockView.h"
+#import "SBRootFolderView.h"
+#import "SBRootFolderController.h"
+#import "CDStructures.h"
 
 #import "HBPreferences.h"
 
@@ -20,7 +23,19 @@
 
 #pragma mark Declarations
 
+#define UIApp ([UIApplication sharedApplication])
+
+#define cur_orientation ([UIApp statusBarOrientation])
+#define in_landscape (UIInterfaceOrientationIsLandscape(cur_orientation))
+
 #define icon_animation_duration 0.5
+
+@interface SBRootFolderView ()
+
+@new
+- (void)orientationChanged:(NSNotification*)arg1;
+
+@end
 
 @interface SBDockIconListView ()
 
@@ -141,7 +156,7 @@ static const CGFloat kMaxScale = 1.0;
 
 
 - (CGFloat)horizontalIconBounds {
-	return self.bounds.size.width - [[prefs geticonInset] floatValue] * 2;
+	return (in_landscape ? self.bounds.size.height : self.bounds.size.width) - [[prefs geticonInset] floatValue] * 2;
 }
 
 
@@ -201,9 +216,9 @@ static const CGFloat kMaxScale = 1.0;
 - (CGFloat)iconCenterY {
 
 	if ([[prefs getflushWithBottom] boolValue]) {
-		return self.bounds.size.height - [self collapsedIconWidth] / 2 - 10.0;
+		return (in_landscape ? self.bounds.size.width : self.bounds.size.height) - [self collapsedIconWidth] / 2 - 10.0;
 	} else {
-		return self.bounds.size.height / 2;
+		return (in_landscape ? self.bounds.size.width : self.bounds.size.height) / 2;
 	}
 
 }
@@ -250,10 +265,20 @@ static const CGFloat kMaxScale = 1.0;
 			iconView.location = [self iconLocation];
 
 			CGPoint center = CGPointZero;
-			center.x = xOffset + ([self collapsedIconWidth] * i) + ([self collapsedIconWidth] / 2) + (self.bounds.size.width - [self horizontalIconBounds]) / 2;
-			center.y = [self iconCenterY];
+
+			if (!in_landscape) {
+				center.x = xOffset + ([self collapsedIconWidth] * i) + ([self collapsedIconWidth] / 2) + (self.bounds.size.width - [self horizontalIconBounds]) / 2;
+				center.y = [self iconCenterY];
+			} else {
+				center.x = [self iconCenterY];
+				center.y = xOffset + ([self collapsedIconWidth] * i) + ([self collapsedIconWidth] / 2) + (self.bounds.size.height - [self horizontalIconBounds]) / 2;
+			}
 
 			iconView.center = center;
+		}
+
+		if (self.activatingIcon) {
+			self.focusPoint = in_landscape ? self.activatingIcon.center.y : self.activatingIcon.center.x;
 		}
 
 		[self updateIconTransforms];
@@ -282,7 +307,7 @@ static const CGFloat kMaxScale = 1.0;
 		SBIcon *icon = self.model.icons[i];
 		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:icon];
 
-		const CGFloat offsetFromFocusPoint = self.focusPoint - iconView.center.x;
+		const CGFloat offsetFromFocusPoint = self.focusPoint - (in_landscape ? iconView.center.y : iconView.center.x);
 
 
 		CGFloat scale = [self collapsedIconScale];
@@ -298,8 +323,13 @@ static const CGFloat kMaxScale = 1.0;
 
 		CGPoint center = iconView.center;
 
-		center.x += tx;
-		center.y += ty;
+		if (!in_landscape) {
+			center.x += tx;
+			center.y += ty;
+		} else {
+			center.x += ty;
+			center.y += tx;
+		}
 
 		iconView.center = center;
 
@@ -352,7 +382,12 @@ static const CGFloat kMaxScale = 1.0;
 		CGRect textRect = [text boundingRectWithSize:[objc_getClass("SBIconView") maxLabelSize] options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil];
 
 		self.indicatorView.bounds = CGRectMake(0, 0, textRect.size.width + 30, textRect.size.height + 30);
-		self.indicatorView.center = CGPointMake(MAX(MIN(iconView.center.x, self.bounds.size.width - self.indicatorView.bounds.size.width / 2), self.indicatorView.bounds.size.width / 2), (self.bounds.size.height / 2) - [[prefs getevasionDistance] doubleValue] - self.indicatorView.bounds.size.height - 20.0);
+
+		if (!in_landscape) {
+			self.indicatorView.center = CGPointMake(MAX(MIN(self.focusPoint, self.bounds.size.width - self.indicatorView.bounds.size.width / 2), self.indicatorView.bounds.size.width / 2), (self.bounds.size.height / 2) - [[prefs getevasionDistance] doubleValue] - self.indicatorView.bounds.size.height - 20.0);
+		} else {
+			self.indicatorView.center = CGPointMake((self.bounds.size.width / 2) - [[prefs getevasionDistance] doubleValue] - self.indicatorView.bounds.size.width, MAX(MIN(self.focusPoint, self.bounds.size.height - self.indicatorView.bounds.size.height / 2), self.indicatorView.bounds.size.height / 2));
+		}
 
 		self.indicatorLabel.text = text;
 		self.indicatorLabel.bounds = textRect;
@@ -375,7 +410,7 @@ static const CGFloat kMaxScale = 1.0;
 	VERIFY_START(touchesBegan_withEvent);
 
 	self.trackingTouch = true;
-	self.focusPoint = [[touches anyObject] locationInView:self].x;
+	self.focusPoint = in_landscape ? [[touches anyObject] locationInView:self].y : [[touches anyObject] locationInView:self].x;
 	self.activatingIcon = nil;
 
 	[self layoutIconsIfNeeded:icon_animation_duration domino:false];
@@ -401,7 +436,7 @@ static const CGFloat kMaxScale = 1.0;
 		iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:self.focusPoint]]];
 	} @catch (NSException *e) { }
 
-	if ([[touches anyObject] locationInView:self].y < 0 && ![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) {
+	if ((in_landscape ? [[touches anyObject] locationInView:self].x : [[touches anyObject] locationInView:self].y) < 0 && ![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) {
 
 		// get origin, remove transform, restore origin
 		CGPoint origin = iconView.origin;
@@ -429,7 +464,7 @@ static const CGFloat kMaxScale = 1.0;
 		return;
 	}
 
-	self.focusPoint = [[touches anyObject] locationInView:self].x;
+	self.focusPoint = in_landscape ? [[touches anyObject] locationInView:self].y : [[touches anyObject] locationInView:self].x;
 	[self layoutIconsIfNeeded:0 domino:false];
 
 	// Update indicator
@@ -454,7 +489,10 @@ static const CGFloat kMaxScale = 1.0;
 
 	[self updateIndicatorForIconView:nil animated:true];
 
-	if([[touches anyObject] locationInView:self].y > self.bounds.size.height - kCancelGestureRange) {
+
+	if (in_landscape ?
+		 ( [[touches anyObject] locationInView:self].x > self.bounds.size.width - kCancelGestureRange) :
+		 ( [[touches anyObject] locationInView:self].y > self.bounds.size.height - kCancelGestureRange)) {
 		// User swiped off to the bottom edge of the screen; collapse and do nothing
 		[self collapseAnimated:true];
 		return;
@@ -474,7 +512,6 @@ static const CGFloat kMaxScale = 1.0;
 	[self bringSubviewToFront:iconView];
 
 	self.activatingIcon = iconView;
-	self.focusPoint = iconView.center.x;
 
 	[self layoutIconsIfNeeded:icon_animation_duration domino:false];
 
@@ -509,14 +546,31 @@ static const CGFloat kMaxScale = 1.0;
 
 
 - (NSUInteger)columnAtX:(CGFloat)x {
-	return [self columnAtPoint:CGPointMake(x, 0)];
+	return in_landscape ? [self rowAtPoint:CGPointMake(0, x)] : [self columnAtPoint:CGPointMake(x, 0)];
 }
 
 - (NSUInteger)columnAtPoint:(struct CGPoint)arg1 {
+	if (in_landscape) {
+		return 0;
+	}
+
 	CGFloat collapsedItemWidth = [self collapsedIconScale] * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width) / 2, 0);
 
 	NSUInteger index = floorf((arg1.x - (self.bounds.size.width - [self horizontalIconBounds]) / 2 - xOffset) / collapsedItemWidth);
+
+	return index;
+}
+
+- (NSUInteger)rowAtPoint:(struct CGPoint)arg1 {
+	if (!in_landscape) {
+		return 0;
+	}
+
+	CGFloat collapsedItemWidth = [self collapsedIconScale] * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
+	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width) / 2, 0);
+
+	NSUInteger index = floorf((arg1.y - (self.bounds.size.height - [self horizontalIconBounds]) / 2 - xOffset) / collapsedItemWidth);
 
 	return index;
 }
@@ -589,7 +643,7 @@ static const CGFloat kMaxScale = 1.0;
 
 	if ([targetIconView isInDock]) {
 		dockListView.activatingIcon = targetIconView;
-		dockListView.focusPoint = targetIconView.center.x;
+		dockListView.focusPoint = in_landscape ? targetIconView.center.y : targetIconView.center.x;
 		dockListView.trackingTouch = true;
 		[dockListView layoutIconsIfNeeded:0.0 domino:false];
 	}
@@ -629,10 +683,21 @@ static const CGFloat kMaxScale = 1.0;
 
 	CGRect frame = CGRectZero;
 
-	frame.size.width = (CGRectGetMaxX(lastIcon.frame) - CGRectGetMinX(firstIcon.frame)) + backgroundMargin;
-	frame.size.height = [_iconListView collapsedIconWidth] + backgroundMargin;
-	frame.origin.x = CGRectGetMinX(firstIcon.frame) - backgroundMargin / 2;
-	frame.origin.y = ([_iconListView iconCenterY]) - (backgroundMargin / 2) - ([_iconListView collapsedIconWidth] / 2);
+	if (!in_landscape) {
+
+		frame.size.width = (CGRectGetMaxX(lastIcon.frame) - CGRectGetMinX(firstIcon.frame)) + backgroundMargin;
+		frame.size.height = [_iconListView collapsedIconWidth] + backgroundMargin;
+		frame.origin.x = CGRectGetMinX(firstIcon.frame) - backgroundMargin / 2;
+		frame.origin.y = ([_iconListView iconCenterY]) - (backgroundMargin / 2) - ([_iconListView collapsedIconWidth] / 2);
+
+	} else {
+
+		frame.size.width = [_iconListView collapsedIconWidth] + backgroundMargin;
+		frame.size.height = (CGRectGetMaxY(lastIcon.frame) - CGRectGetMinY(firstIcon.frame)) + backgroundMargin;
+		frame.origin.x = ([_iconListView iconCenterY]) - (backgroundMargin / 2) - ([_iconListView collapsedIconWidth] / 2);
+		frame.origin.y = CGRectGetMinY(firstIcon.frame) - backgroundMargin / 2;
+
+	}
 
 	if (!_backgroundView.layer.mask) {
 		_backgroundView.layer.mask = [CAShapeLayer layer];
@@ -642,6 +707,52 @@ static const CGFloat kMaxScale = 1.0;
 
 	_backgroundView.layer.mask.frame = frame;
 
+}
+
+@end
+
+@hook SBRootFolderView
+
+- (id)initWithFolder:(id)arg1 orientation:(UIInterfaceOrientation)arg2 viewMap:(id)arg3 forSnapshot:(BOOL)arg4 {
+	self = @orig(arg1, arg2, arg3, arg4);
+	if (self) {
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orientationChanged:) name:UIDeviceOrientationDidChangeNotification object:[UIDevice currentDevice]];
+	}
+	return self;
+}
+
+- (void)orientationChanged:(NSNotification*)arg1 {
+	for (UIView *view in [[[objc_getClass("SBIconController") sharedInstance] _rootFolderController] iconListViews]) {
+		view.alpha = 1;
+	}
+
+	CGPoint contentOffset = [self.scrollView contentOffset];
+
+	[self iconScrollView:self.scrollView willSetContentOffset:&contentOffset];
+}
+
+- (void)iconScrollView:(UIScrollView*)arg1 willSetContentOffset:(inout struct CGPoint *)arg2 {
+
+	@orig(arg1, arg2);
+
+	if (in_landscape) {
+		int page = floor(arg2->x / arg1.frame.size.width);
+
+		CGFloat opacity = (arg2->x / arg1.frame.size.width) - (CGFloat)page;
+
+		UIView *nextPage = [[[objc_getClass("SBIconController") sharedInstance] _rootFolderController] iconListViewAtIndex:page + 1];
+
+		nextPage.alpha = opacity;
+	}
+}
+
+
+@end
+
+@hook SBRootFolderController
+
+- (BOOL)_shouldSlideDockOutDuringRotationFromOrientation:(UIInterfaceOrientation)arg1 toOrientation:(UIInterfaceOrientation)arg2 {
+	return true; // Hides animation glitch. TODO: Make a proper fix for the glitch
 }
 
 @end
