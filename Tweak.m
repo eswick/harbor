@@ -453,6 +453,8 @@ static const CGFloat kMaxScale = 1.0;
 		[iconView touchesBegan:touches withEvent:nil];
 		[iconView longPressTimerFired];
 
+		[[objc_getClass("SBIconController") sharedInstance] setIsEditing:true];
+
 		[self updateIndicatorForIconView:nil animated:true];
 
 		return;
