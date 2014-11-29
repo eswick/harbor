@@ -41,6 +41,7 @@
 
 @property (nonatomic, assign) CGFloat focusPoint;
 @property (nonatomic, assign) BOOL trackingTouch;
+@property (nonatomic, assign) BOOL appLaunching;
 @property (nonatomic, assign) SBIconView *activatingIcon;
 
 @property (nonatomic, assign) CGFloat maxTranslationX;
@@ -85,6 +86,7 @@ static const CGFloat kMaxScale = 1.0;
 
 @synthesize focusPoint;
 @synthesize trackingTouch;
+@synthesize appLaunching;
 @synthesize activatingIcon;
 
 @synthesize maxTranslationX;
@@ -224,6 +226,9 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
+
+	if (self.appLaunching)
+		return;
 
 	if (![[prefs getenabled] boolValue]) {
 		@orig(animationDuration, arg2);
@@ -603,6 +608,20 @@ static const CGFloat kMaxScale = 1.0;
 	[[[objc_getClass("SBIconController") sharedInstance] dockListView] collapseAnimated:true];
 
 	VERIFY_STOP(_cleanupAnimation);
+}
+
+@end
+
+@hook SBUIAnimationZoomUpAppFromHome
+
+- (void)prepareZoom {
+	[[[objc_getClass("SBIconController") sharedInstance] dockListView] setAppLaunching:true];
+	@orig();
+}
+
+- (void)cleanupZoom {
+	[[[objc_getClass("SBIconController") sharedInstance] dockListView] setAppLaunching:false];
+	@orig();
 }
 
 @end
