@@ -287,17 +287,11 @@ static const CGFloat kMaxScale = 1.0;
 		}
 
 		[self updateIconTransforms];
+
+		if ([self.superview isKindOfClass:objc_getClass("SBDockView")]) {
+			[(SBDockView*)self.superview layoutBackgroundView];
+		}
 	}];
-
-	if ([self.superview isKindOfClass:objc_getClass("SBDockView")]) {
-		[CATransaction begin];
-		[CATransaction setValue:@(animationDuration) forKey:kCATransactionAnimationDuration];
-		[CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
-
-		[(SBDockView*)self.superview layoutBackgroundView];
-
-		[CATransaction commit];
-	}
 
 	if (self.activatingIcon) {
 		[self bringSubviewToFront:self.activatingIcon];
@@ -724,13 +718,8 @@ static const CGFloat kMaxScale = 1.0;
 
 	}
 
-	if (!_backgroundView.layer.mask) {
-		_backgroundView.layer.mask = [CAShapeLayer layer];
-		_backgroundView.layer.mask.cornerRadius = 5.0;
-		_backgroundView.layer.mask.backgroundColor = [[UIColor blackColor] CGColor];
-	}
-
-	_backgroundView.layer.mask.frame = frame;
+	_backgroundView.layer.cornerRadius = 5.0;
+	_backgroundView.frame = frame;
 
 }
 
