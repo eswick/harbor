@@ -40,6 +40,13 @@
 	return self;
 }
 
+- (void)_updateCloseBoxAnimated:(BOOL)arg1 {
+	if ([self isInDock] && [self isEditing])
+		return;
+
+	@orig(arg1);
+}
+
 - (void)updateIndicatorVisibility {
 
 	if (![[prefs getshowStateIndicator] boolValue]) {
