@@ -679,6 +679,10 @@ static const CGFloat kMaxScale = 1.0;
 	UIView *firstIcon = [_iconListView.viewMap mappedIconViewForIcon:[_iconListView.model.icons firstObject]];
 	UIView *lastIcon = [_iconListView.viewMap mappedIconViewForIcon:[_iconListView.model.icons lastObject]];
 
+	if ([[_iconListView.model.icons lastObject] isKindOfClass:objc_getClass("SBPlaceholderIcon")]) {
+		lastIcon = [_iconListView.viewMap mappedIconViewForIcon:_iconListView.model.icons[([_iconListView.model.icons count]) - 2]];
+	}
+
 	CGFloat backgroundMargin = 25.0;
 
 	CGRect frame = CGRectZero;
