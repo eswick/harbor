@@ -23,11 +23,11 @@
 @hook SBIconView
 @synthesize indicatorView;
 
-- (BOOL)userInteractionEnabled {
-	if ([self isInDock] && ![self isEditing])
-		return false;
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+	if ([self isInDock])
+		return nil;
 
-	return @orig();
+	return @orig(point, event);
 }
 
 - (id)initWithDefaultSize {
