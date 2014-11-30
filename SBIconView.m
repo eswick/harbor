@@ -23,6 +23,13 @@
 @hook SBIconView
 @synthesize indicatorView;
 
+- (BOOL)userInteractionEnabled {
+	if ([self isInDock] && ![self isEditing])
+		return false;
+
+	return @orig();
+}
+
 - (id)initWithDefaultSize {
 	self = @orig();
 	if (self) {

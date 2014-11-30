@@ -26,9 +26,9 @@
 #define UIApp ([UIApplication sharedApplication])
 
 #define cur_orientation ([UIApp statusBarOrientation])
-#define in_landscape (UIInterfaceOrientationIsLandscape(cur_orientation))
+#define in_landscape (UIInterfaceOrientationIsLandscape(cur_orientation) && UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad)
 
-#define icon_animation_duration 0.5
+#define icon_animation_duration ([[prefs getanimationDuration] floatValue])
 
 @interface SBRootFolderView ()
 
@@ -108,6 +108,7 @@ static const CGFloat kMaxScale = 1.0;
 	if (self) {
 
 		self.trackingTouch = false;
+		self.appLaunching = false;
 
 		// Set up indicator view
 		self.indicatorView = [[UIView alloc] init];
@@ -609,13 +610,17 @@ static const CGFloat kMaxScale = 1.0;
 @hook SBUIAnimationZoomUpAppFromHome
 
 - (void)prepareZoom {
+	VERIFY_START(prepareZoom);
 	[[[objc_getClass("SBIconController") sharedInstance] dockListView] setAppLaunching:true];
 	@orig();
+	VERIFY_STOP(prepareZoom);
 }
 
 - (void)cleanupZoom {
+	VERIFY_START(cleanupZoom);
 	[[[objc_getClass("SBIconController") sharedInstance] dockListView] setAppLaunching:false];
 	@orig();
+	VERIFY_STOP(cleanupZoom);
 }
 
 @end

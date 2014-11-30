@@ -11,6 +11,10 @@
 
 PREF(NSNumber*, enabled, @(true), @"Enabled", PSSwitchCell, )
 
+GROUP("Animation Duration", "")
+
+PREF(NSNumber*, animationDuration, @(0.5), @"Animation Duration", PSSliderCell, @"showValue" : @(true), @"min" : @(0.1), @"max" : @(1.0))
+
 GROUP("Icon Inset", "")
 
 PREF(NSNumber*, iconInset, is_iPad ? @(30.0) : @(15.0), @"Icon Inset", PSSliderCell, @"showValue" : @(true), @"min" : @(0.1), @"max" : is_iPad ? @(120.0) : @(60.0))
@@ -26,8 +30,8 @@ PREF(NSNumber*, effectiveRange, is_iPad ? @(200.0) : @(60.0), @"Effective Range"
 GROUP("", "")
 
 PREF(NSNumber*, flushWithBottom, @(true), @"Flush With Screen Bottom", PSSwitchCell, )
-PREF(NSNumber*, showIndicator, @(true), @"Show App Indicator", PSSwitchCell, )
-PREF(NSNumber*, showStateIndicator, @(true), @"Show App State Dot", PSSwitchCell, )
+PREF(NSNumber*, showIndicator, @(false), @"Show App Indicator", PSSwitchCell, )
+PREF(NSNumber*, showStateIndicator, @(false), @"Show App State Dot", PSSwitchCell, )
 
 #undef PREF
 #undef GROUP

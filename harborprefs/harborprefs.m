@@ -1,6 +1,6 @@
 #import <Preferences/Preferences.h>
 #import "HBPreferences.h"
-#define DYLIB_INSTALL_PATH @"/var/mobile/Library/Preferences/com.eswick.osexperience.license"
+#define DYLIB_INSTALL_PATH @"/var/mobile/Library/Preferences/com.eswick.harbor.license"
 
 @interface HBDownloadController : NSObject
 @property (assign) UIAlertView *alertView;

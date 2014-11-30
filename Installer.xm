@@ -60,7 +60,7 @@
 	[loading startAnimating];
 
 	//MSHookIvar<UIView*>(self.alertView, "_accessoryView") = loading;
-	//[self.alertView show];
+	[self.alertView show];
 
 
 	/* get arch */
@@ -90,6 +90,8 @@
 }
 
 - (void)error:(NSString*)text{
+
+	NSLog(@"Download error: %@", text);
 
 	[self.connection cancel];
 
