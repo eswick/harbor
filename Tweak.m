@@ -290,7 +290,9 @@ static const CGFloat kMaxScale = 1.0;
 		[self updateIconTransforms];
 
 		if ([self.superview isKindOfClass:objc_getClass("SBDockView")]) {
-			[(SBDockView*)self.superview layoutBackgroundView];
+			if (![[prefs getuseNormalBackground] boolValue]) {
+				[(SBDockView*)self.superview layoutBackgroundView];
+			}
 		}
 	}];
 
@@ -690,8 +692,10 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)layoutSubviews {
 	@orig();
-	_highlightView.hidden = true;
-	[self layoutBackgroundView];
+	if (![[prefs getuseNormalBackground] boolValue]) {
+		_highlightView.hidden = true;
+		[self layoutBackgroundView];
+	}
 }
 
 - (void)layoutBackgroundView {
@@ -745,23 +749,27 @@ static const CGFloat kMaxScale = 1.0;
 		view.alpha = 1;
 	}
 
-	CGPoint contentOffset = [self.scrollView contentOffset];
+	if (![[prefs getuseNormalBackground] boolValue]) {
+		CGPoint contentOffset = [self.scrollView contentOffset];
 
-	[self iconScrollView:self.scrollView willSetContentOffset:&contentOffset];
+		[self iconScrollView:self.scrollView willSetContentOffset:&contentOffset];
+	}
 }
 
 - (void)iconScrollView:(UIScrollView*)arg1 willSetContentOffset:(inout struct CGPoint *)arg2 {
 
 	@orig(arg1, arg2);
 
-	if (in_landscape) {
-		int page = floor(arg2->x / arg1.frame.size.width);
+	if (![[prefs getuseNormalBackground] boolValue]) {
+		if (in_landscape) {
+			int page = floor(arg2->x / arg1.frame.size.width);
 
-		CGFloat opacity = (arg2->x / arg1.frame.size.width) - (CGFloat)page;
+			CGFloat opacity = (arg2->x / arg1.frame.size.width) - (CGFloat)page;
 
-		UIView *nextPage = [[[objc_getClass("SBIconController") sharedInstance] _rootFolderController] iconListViewAtIndex:page + 1];
+			UIView *nextPage = [[[objc_getClass("SBIconController") sharedInstance] _rootFolderController] iconListViewAtIndex:page + 1];
 
-		nextPage.alpha = opacity;
+			nextPage.alpha = opacity;
+		}
 	}
 }
 

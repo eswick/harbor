@@ -39,5 +39,9 @@ GROUP("", "Show Yosemite-style black dot below running apps.")
 
 PREF(NSNumber*, showStateIndicator, @(false), @"Show App State Dot", PSSwitchCell, )
 
+GROUP("", "Just for Aehmlo.")
+
+PREF(NSNumber*, useNormalBackground, @(false), @"Use Normal Dock Background", PSSwitchCell, )
+
 #undef PREF
 #undef GROUP
