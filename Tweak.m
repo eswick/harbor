@@ -259,7 +259,7 @@ static const CGFloat kMaxScale = 1.0;
 
 	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width) / 2, 0);
 
-	[UIView animateWithDuration:animationDuration animations:^{
+	[UIView animateWithDuration:animationDuration delay:0.0 usingSpringWithDamping:0.5 initialSpringVelocity:1 options:0 animations:^{
 
 		for (int i = 0; i < self.model.numberOfIcons; i++) {
 
@@ -294,7 +294,7 @@ static const CGFloat kMaxScale = 1.0;
 				[(SBDockView*)self.superview layoutBackgroundView];
 			}
 		}
-	}];
+	} completion:nil];
 
 	if (self.activatingIcon) {
 		[self bringSubviewToFront:self.activatingIcon];
