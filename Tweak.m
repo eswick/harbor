@@ -531,6 +531,8 @@ static const CGFloat kMaxScale = 1.0;
 	self.trackingTouch = false;
 	[self layoutIconsIfNeeded:0 domino:false];
 
+	[self updateIndicatorForIconView:nil animated:true];
+
 	VERIFY_STOP(touchesCancelled_withEvent);
 }
 
