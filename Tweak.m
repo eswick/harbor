@@ -55,6 +55,7 @@
 - (CGFloat)horizontalIconBounds;
 - (CGFloat)collapsedIconScale;
 - (CGFloat)collapsedIconWidth;
+- (CGPoint)collapsedCenterForIcon:(SBIcon*)icon;
 - (CGFloat)scaleForOffsetFromFocusPoint:(CGFloat)offset;
 - (CGFloat)yTranslationForOffsetFromFocusPoint:(CGFloat)offset;
 - (CGFloat)xTranslationForOffsetFromFocusPoint:(CGFloat)offset;
@@ -228,9 +229,6 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
 
-	if (self.appLaunching)
-		return;
-
 	if (![[prefs getenabled] boolValue]) {
 		@orig(animationDuration, arg2);
 		return;
@@ -302,6 +300,23 @@ static const CGFloat kMaxScale = 1.0;
 
 }
 
+- (CGPoint)collapsedCenterForIcon:(SBIcon*)icon {
+	CGFloat defaultWidth = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
+
+	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * defaultWidth) / 2, 0);
+
+	CGPoint center = CGPointZero;
+
+	if (!in_landscape) {
+		center.x = xOffset + ([self collapsedIconWidth] * [self.model indexForIcon:icon]) + ([self collapsedIconWidth] / 2) + (self.bounds.size.width - [self horizontalIconBounds]) / 2;
+		center.y = [self iconCenterY];
+	} else {
+		center.x = [self iconCenterY];
+		center.y = xOffset + ([self collapsedIconWidth] * [self.model indexForIcon:icon]) + ([self collapsedIconWidth] / 2) + (self.bounds.size.height - [self horizontalIconBounds]) / 2;
+	}
+
+	return center;
+}
 
 - (void)updateIconTransforms {
 
@@ -411,6 +426,9 @@ static const CGFloat kMaxScale = 1.0;
 
 	VERIFY_START(touchesBegan_withEvent);
 
+	if (self.appLaunching)
+		return;
+
 	self.trackingTouch = true;
 	self.focusPoint = in_landscape ? [[touches anyObject] locationInView:self].y : [[touches anyObject] locationInView:self].x;
 	self.activatingIcon = nil;
@@ -431,6 +449,9 @@ static const CGFloat kMaxScale = 1.0;
 
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+
+	if (self.appLaunching)
+		return;
 
 	SBIconView *iconView = nil;
 
@@ -485,6 +506,9 @@ static const CGFloat kMaxScale = 1.0;
 
 	VERIFY_START(touchesEnded_withEvent);
 
+	if (self.appLaunching)
+		return;
+
 	if ([[objc_getClass("SBIconController") sharedInstance] grabbedIcon]) {
 		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:[[objc_getClass("SBIconController") sharedInstance] grabbedIcon]];
 		[iconView touchesEnded:touches withEvent:nil];
@@ -527,6 +551,9 @@ static const CGFloat kMaxScale = 1.0;
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 
 	VERIFY_START(touchesCancelled_withEvent);
+
+	if (self.appLaunching)
+		return;
 
 	self.trackingTouch = false;
 	[self layoutIconsIfNeeded:0 domino:false];
@@ -667,7 +694,6 @@ static const CGFloat kMaxScale = 1.0;
 
 	if ([targetIconView isInDock]) {
 		dockListView.activatingIcon = targetIconView;
-		dockListView.focusPoint = in_landscape ? targetIconView.center.y : targetIconView.center.x;
 		dockListView.trackingTouch = true;
 		[dockListView layoutIconsIfNeeded:0.0 domino:false];
 	}
