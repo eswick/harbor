@@ -426,6 +426,11 @@ static const CGFloat kMaxScale = 1.0;
 
 	VERIFY_START(touchesBegan_withEvent);
 
+	if (![[prefs getenabled] boolValue]) {
+		@orig(touches, event);
+		return;
+	}
+
 	if (self.appLaunching)
 		return;
 
@@ -449,6 +454,10 @@ static const CGFloat kMaxScale = 1.0;
 
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+
+	if (![[prefs getenabled] boolValue]) {
+		@orig(touches, event);
+	}
 
 	if (self.appLaunching)
 		return;
@@ -506,6 +515,11 @@ static const CGFloat kMaxScale = 1.0;
 
 	VERIFY_START(touchesEnded_withEvent);
 
+	if (![[prefs getenabled] boolValue]) {
+		@orig(touches, event);
+		return;
+	}
+
 	if (self.appLaunching)
 		return;
 
@@ -551,6 +565,11 @@ static const CGFloat kMaxScale = 1.0;
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 
 	VERIFY_START(touchesCancelled_withEvent);
+
+	if (![[prefs getenabled] boolValue]) {
+		@orig(touches, event);
+		return;
+	}
 
 	if (self.appLaunching)
 		return;
@@ -642,6 +661,12 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)prepareZoom {
 	VERIFY_START(prepareZoom);
+
+	if (![[prefs getenabled] boolValue]) {
+		@orig();
+		return;
+	}
+
 	[[[objc_getClass("SBIconController") sharedInstance] dockListView] setAppLaunching:true];
 	@orig();
 	VERIFY_STOP(prepareZoom);
@@ -649,6 +674,12 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)cleanupZoom {
 	VERIFY_START(cleanupZoom);
+
+	if (![[prefs getenabled] boolValue]) {
+		@orig();
+		return;
+	}
+
 	[[[objc_getClass("SBIconController") sharedInstance] dockListView] setAppLaunching:false];
 	@orig();
 	VERIFY_STOP(cleanupZoom);
@@ -720,6 +751,8 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)layoutSubviews {
 	@orig();
+	if (![[prefs getenabled] boolValue])
+		return;
 	if (![[prefs getuseNormalBackground] boolValue]) {
 		_highlightView.hidden = true;
 		[self layoutBackgroundView];
@@ -788,6 +821,9 @@ static const CGFloat kMaxScale = 1.0;
 
 	@orig(arg1, arg2);
 
+	if (![[prefs getenabled] boolValue])
+		return;
+
 	if (![[prefs getuseNormalBackground] boolValue]) {
 		if (in_landscape) {
 			int page = floor(arg2->x / arg1.frame.size.width);
@@ -807,6 +843,10 @@ static const CGFloat kMaxScale = 1.0;
 @hook SBRootFolderController
 
 - (BOOL)_shouldSlideDockOutDuringRotationFromOrientation:(UIInterfaceOrientation)arg1 toOrientation:(UIInterfaceOrientation)arg2 {
+
+	if (![[prefs getenabled] boolValue])
+		return @orig(arg1, arg2);
+
 	return true; // Hides animation glitch. TODO: Make a proper fix for the glitch
 }
 
