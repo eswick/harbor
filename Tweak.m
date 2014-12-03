@@ -15,6 +15,7 @@
 #import "SBDockView.h"
 #import "SBRootFolderView.h"
 #import "SBRootFolderController.h"
+#import "SBIconModelPropertyListFileStore.h"
 #import "CDStructures.h"
 
 #import "HBPreferences.h"
@@ -848,6 +849,37 @@ static const CGFloat kMaxScale = 1.0;
 		return @orig(arg1, arg2);
 
 	return true; // Hides animation glitch. TODO: Make a proper fix for the glitch
+}
+
+@end
+
+@hook SBIconModelPropertyListFileStore
+
+
+@end
+
+@hook SBIconModelPropertyListFileStore
+
+/*
+Use different icon state plist so that SpringBoard doesn't mess up the dock
+when we are in safe mode
+*/
+
+#define harborPlistStore "file:///var/mobile/Library/SpringBoard/IconState_harbor.plist"
+
+- (BOOL)_save:(id)arg1 url:(id)arg2 error:(id *)arg3 {
+	if (@orig(arg1, [NSURL URLWithString:@harborPlistStore], arg3))
+		;
+
+	return @orig(arg1, arg2, arg3);
+}
+
+- (id)_load:(NSURL*)path error:(id *)arg2 {
+	if ([[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/SpringBoard/IconState_harbor.plist"]) {
+		return @orig([NSURL URLWithString:@harborPlistStore], arg2);
+	}
+
+	return @orig(path, arg2);
 }
 
 @end
