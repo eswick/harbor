@@ -855,11 +855,6 @@ static const CGFloat kMaxScale = 1.0;
 
 @hook SBIconModelPropertyListFileStore
 
-
-@end
-
-@hook SBIconModelPropertyListFileStore
-
 /*
 Use different icon state plist so that SpringBoard doesn't mess up the dock
 when we are in safe mode

@@ -24,6 +24,9 @@
 @synthesize indicatorView;
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+	if (![[prefs getenabled] boolValue])
+		return @orig(point, event);
+
 	if ([self isInDock])
 		return nil;
 
@@ -32,7 +35,8 @@
 
 - (id)initWithDefaultSize {
 	self = @orig();
-	if (self) {
+	if (self && [[prefs getenabled] boolValue]) {
+
 		self.indicatorView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 5, 5)];
 		self.indicatorView.backgroundColor = [UIColor blackColor];
 		self.indicatorView.clipsToBounds = true;
@@ -48,6 +52,11 @@
 }
 
 - (void)_updateCloseBoxAnimated:(BOOL)arg1 {
+	if (![[prefs getenabled] boolValue]) {
+		@orig(arg1);
+		return;
+	}
+
 	if ([self isInDock] && [self isEditing])
 		return;
 
@@ -55,6 +64,9 @@
 }
 
 - (void)updateIndicatorVisibility {
+
+	if (![[prefs getenabled] boolValue])
+		return;
 
 	if (![[prefs getshowStateIndicator] boolValue]) {
 		self.indicatorView.hidden = true;
