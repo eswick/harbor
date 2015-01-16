@@ -54,7 +54,7 @@
 
 - (void)beginDownload{
 
-	self.alertView = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Downloading License\nPlease Wait... (%.0f%%)", self.progress] message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:nil];
+	self.alertView = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Downloading License\nPlease Wait... (%.0f%%)", self.progress] message:nil delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:nil];
 
 	UIActivityIndicatorView *loading = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
 	[loading startAnimating];
@@ -128,6 +128,13 @@
 
 		}
 
+	} else {
+		[self.connection cancel];
+		[self.receivedData release];
+		[self.connection release];
+
+		self.receivedData = nil;
+		self.connection = nil;
 	}
 }
 
