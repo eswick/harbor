@@ -27,6 +27,15 @@ GROUP("Wave Width", "")
 
 PREF(NSNumber*, effectiveRange, is_iPad ? @(200.0) : @(60.0), @"Effective Range", PSSliderCell, @"showValue" : @(true), @"min" : @(0.1), @"max" : is_iPad ? @(400.0) : @(180.0))
 
+
+GROUP("Bounce Options", "")
+
+PREF(NSNumber*, bounceInterval, @(-1.0), @"Bounce", PSLinkListCell, @"detail" : @"PSListItemsController", \
+\
+@"validTitles" : @[@"Never", @"Once", @"Twice", @"Thrice", @"Every 2 seconds", @"Every 5 seconds" , @"Every 15 seconds", @"Every 30 seconds", @"Every 1 minute", @"Every 1.5 minutes", @"Every 2 minutes", @"Every 2.5 minutes", @"Every 3 minutes", @"Every 5 minutes"], \
+@"validValues" : @[@(0.0),   @(-1.0),  @(-2.0),   @(-3.0),             @(2.0),              @(5.0),             @(15.0),             @(30.0),           @(60.0),        @(60.0 * 1.5),        @(60.0 * 2),        @(60.0 * 2.5),       @(60.0 * 3) ,        @(60.0 * 5)],
+)
+
 GROUP("", "Place the dock flush with the bottom of the screen.")
 
 PREF(NSNumber*, flushWithBottom, @(true), @"Flush With Bottom Edge", PSSwitchCell, )

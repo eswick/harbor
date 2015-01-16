@@ -16,7 +16,7 @@ export VERSION=0.8.1
 Harbor_CFLAGS += -DVERSION=\"$(VERSION)\"
 
 ifdef MAKE_SOURCE_DYLIB
-Harbor_FILES += Tweak.m SBIconView.m HBPreferences.m
+Harbor_FILES += Tweak.m SBIconView.m CAKeyframeAnimation+dockBounce.m HBPreferences.m
 Harbor_FILES += extensions/UIView+Origin.m
 
 Harbor_CFLAGS += -Iinclude -Iextensions -fobjc-logos -Wno-objc-missing-super-calls -Wno-unused-function -mno-thumb

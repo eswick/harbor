@@ -3,7 +3,7 @@ include theos/makefiles/common.mk
 
 BUNDLE_NAME = harborprefs
 
-export VERSION=0.8.1
+export VERSION=0.8.2
 harborprefs_CFLAGS += -DVERSION=\"$(VERSION)\"
 
 harborprefs_FILES += harborprefs.m ../HBPreferences.m ../Installer.xm
