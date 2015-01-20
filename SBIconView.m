@@ -193,6 +193,9 @@
 
 		SBApplication *app = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:appIcon.applicationBundleID];
 
+		if ([UIApp _accessibilityFrontMostApplication] == app)
+			app.lastLaunchDate = [NSDate date];
+
 		if (!app.lastLaunchDate && app.lastNotificationDate) {
 			[self startBouncing];
 		} else if ([app.lastLaunchDate laterDate:app.lastNotificationDate] == app.lastNotificationDate) {
