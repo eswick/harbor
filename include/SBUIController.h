@@ -11,52 +11,52 @@
 
 @interface SBUIController : NSObject
 {
-    SBWindow *_window;
-    UIView *_iconsView;
-    UIView *_contentView;
-    UIStatusBar *_fakeSpringBoardStatusBar;
-    SBAppSliderController *_switcherController;
-    SBAppSliderWindowController *_sliderWindowController;
-    SBApplication *_toggleSwitcherAfterLaunchApp;
-    NSString *_bundleIDOfResignedApp;
-    unsigned int _ignoringEvents:1;
-    unsigned int _lastVolumeDownToControl:1;
-    unsigned int _isBatteryCharging:1;
-    unsigned int _isOnAC:1;
-    unsigned int _isConnectedToUnsupportedChargingAccessory:1;
-    unsigned int _isConnectedToChargeIncapablePowerSource:1;
-    unsigned int _allowAlertWindowRotation:1;
-    id _volumeHandler;
-    float _batteryCapacity;
-    float _curvedBatteryCapacity;
-    BOOL _supportsDetailedBatteryCapacity;
-    int _batteryLoggingStartCapacity;
-    SBDismissOnlyAlertItem *_unsupportedChargerAlert;
-    NSMutableDictionary *_installedSystemGestureViews;
-    SBAnimationStepper *_suspendAnimationStepper;
-    SBAnimationStepper *_statusBarAnimationStepper;
-    CDUnknownBlockType _suspendGestureCompleteForwardToEndHandler;
-    CDUnknownBlockType _suspendGestureCompleteBackwardToStartHandler;
-    BOOL _switcherVisibleWhenSuspendGestureStarted;
-    SBWorkspaceEventQueueLockAssertion *_suspendGestureWorkspaceLock;
-    BOOL _shouldUnscatterForSuspendGesture;
-    BOOL _switcherAnimationRevealing;
-    BOOL _switcherAnimationInProgress;
-    BOOL _switcherGestureRevealedOrDismissedSwitcher;
-    SBSwitchAppGestureView *_switchAppGestureView;
-    CGFloat _switchAppGesturePreviousPercentage;
-    CGFloat _switchAppGestureEffectivePercentage;
-    CGFloat _switchAppGestureInitialPercentage;
-    unsigned long long _switchAppGestureChangedFrames;
-    UIView *_systemGestureBackdrop;
-    UIView *_pendingGestureLaunchView;
-    SBApplication *_pendingAppActivatedByGesture;
-    SBApplication *_appCurrentlyActivatingByGesture;
-    NSMutableArray *_switchAppFullyOrderedList;
-    NSArray *_switchAppFilteredList;
-    BOOL _toggleSwitcherAfterLaunchAppUsesSystemGestureOrientation;
-    CGFloat _ambiguousCCActivationMargin;
-    NSMutableSet *_rotationPreventionReasons;
+  SBWindow *_window;
+  UIView *_iconsView;
+  UIView *_contentView;
+  UIStatusBar *_fakeSpringBoardStatusBar;
+  SBAppSliderController *_switcherController;
+  SBAppSliderWindowController *_sliderWindowController;
+  SBApplication *_toggleSwitcherAfterLaunchApp;
+  NSString *_bundleIDOfResignedApp;
+  unsigned int _ignoringEvents:1;
+  unsigned int _lastVolumeDownToControl:1;
+  unsigned int _isBatteryCharging:1;
+  unsigned int _isOnAC:1;
+  unsigned int _isConnectedToUnsupportedChargingAccessory:1;
+  unsigned int _isConnectedToChargeIncapablePowerSource:1;
+  unsigned int _allowAlertWindowRotation:1;
+  id _volumeHandler;
+  float _batteryCapacity;
+  float _curvedBatteryCapacity;
+  BOOL _supportsDetailedBatteryCapacity;
+  int _batteryLoggingStartCapacity;
+  SBDismissOnlyAlertItem *_unsupportedChargerAlert;
+  NSMutableDictionary *_installedSystemGestureViews;
+  SBAnimationStepper *_suspendAnimationStepper;
+  SBAnimationStepper *_statusBarAnimationStepper;
+  CDUnknownBlockType _suspendGestureCompleteForwardToEndHandler;
+  CDUnknownBlockType _suspendGestureCompleteBackwardToStartHandler;
+  BOOL _switcherVisibleWhenSuspendGestureStarted;
+  SBWorkspaceEventQueueLockAssertion *_suspendGestureWorkspaceLock;
+  BOOL _shouldUnscatterForSuspendGesture;
+  BOOL _switcherAnimationRevealing;
+  BOOL _switcherAnimationInProgress;
+  BOOL _switcherGestureRevealedOrDismissedSwitcher;
+  SBSwitchAppGestureView *_switchAppGestureView;
+  CGFloat _switchAppGesturePreviousPercentage;
+  CGFloat _switchAppGestureEffectivePercentage;
+  CGFloat _switchAppGestureInitialPercentage;
+  unsigned long long _switchAppGestureChangedFrames;
+  UIView *_systemGestureBackdrop;
+  UIView *_pendingGestureLaunchView;
+  SBApplication *_pendingAppActivatedByGesture;
+  SBApplication *_appCurrentlyActivatingByGesture;
+  NSMutableArray *_switchAppFullyOrderedList;
+  NSArray *_switchAppFilteredList;
+  BOOL _toggleSwitcherAfterLaunchAppUsesSystemGestureOrientation;
+  CGFloat _ambiguousCCActivationMargin;
+  NSMutableSet *_rotationPreventionReasons;
 }
 
 + (id)sharedInstanceIfExists;
@@ -196,7 +196,7 @@
 - (float)batteryCapacity;
 - (void)updateBatteryState:(id)arg1;
 - (void)cancelVolumeEvent;
-- (void)handleVolumeEvent:(struct __IOHIDEvent *)arg1;
+- (void)handleVolumeEvent:(void *)arg1;
 - (CGFloat)_contentRotationForOrientation:(long long)arg1;
 - (struct CGAffineTransform)_portraitViewTransformForSwitcherSize:(struct CGSize)arg1 orientation:(long long)arg2;
 - (BOOL)_ignoringEvents;
@@ -265,4 +265,3 @@
 - (void)_indicateConnectedToPower;
 
 @end
-

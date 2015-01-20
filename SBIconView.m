@@ -9,11 +9,24 @@
 #import "SBIconViewMap.h"
 #import "SBIconLabelView.h"
 #import "SBApplicationController.h"
+#import "SBUIController.h"
+#import "SpringBoard.h"
 #import "CAKeyframeAnimation+dockBounce.h"
 #import "BBServer.h"
 #import "BBBulletin.h"
 
 #import "HBPreferences.h"
+
+@interface HBPassthroughWindow : UIWindow
+@end
+
+@implementation HBPassthroughWindow
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+	return nil;
+}
+
+@end
 
 @interface SBIconView ()
 
@@ -29,6 +42,7 @@
 - (void)startBouncing;
 - (void)stopBouncing;
 - (void)updateBouncingState;
+- (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag;
 
 @end
 
@@ -46,6 +60,33 @@
  * clang-logos is mistaking SBApplicationController for SBIconController.
  */
 - (id)applicationWithBundleIdentifier:(id)id;
+
+@end
+
+@interface SBUIController ()
+
+@property (nonatomic, retain) HBPassthroughWindow *iconBounceWindow;
+
+@end
+
+@hook SBUIController
+@synthesize iconBounceWindow;
+
+- (id)init {
+	self = @orig();
+
+	if (self) {
+
+		self.iconBounceWindow = [[HBPassthroughWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+		self.iconBounceWindow.windowLevel = UIWindowLevelAlert;
+
+		self.iconBounceWindow.hidden = false;
+
+		[self.iconBounceWindow release];
+	}
+
+	return self;
+}
 
 @end
 
@@ -84,7 +125,19 @@
 
 - (void)bounce {
 	CAKeyframeAnimation *animation = [CAKeyframeAnimation dockBounceAnimationWithIconHeight:[objc_getClass("SBIconView") defaultVisibleIconImageSize].height];
+	animation.delegate = self;
+
+	if ([UIApp _accessibilityFrontMostApplication] && ![(SBUIController*)[objc_getClass("SBUIController") sharedInstance] isAppSwitcherShowing]) {
+		[[(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindow] addSubview:self];
+	}
+
 	[self.layer addAnimation:animation forKey:@"jumping"];
+}
+
+- (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
+	if ([self isInDock]) {
+		[[[objc_getClass("SBIconController") sharedInstance] dockListView] addSubview:self];
+	}
 }
 
 - (void)bounceTimerFired:(NSTimer*)timer {

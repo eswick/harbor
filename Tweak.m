@@ -15,7 +15,9 @@
 #import "SBDockView.h"
 #import "SBRootFolderView.h"
 #import "SBRootFolderController.h"
+#import "SBUIController.h"
 #import "SBIconModelPropertyListFileStore.h"
+#import "SBIconBadgeView.h"
 #import "CDStructures.h"
 
 #import "HBPreferences.h"
@@ -35,6 +37,12 @@
 
 @new
 - (void)orientationChanged:(NSNotification*)arg1;
+
+@end
+
+@interface SBUIController ()
+
+@property (nonatomic, retain) UIWindow *iconBounceWindow;
 
 @end
 
@@ -63,6 +71,7 @@
 - (CGFloat)iconCenterY;
 - (NSUInteger)columnAtX:(CGFloat)x;
 
+- (void)removeAllBounceAnimations;
 - (void)updateIconTransforms;
 - (void)collapseAnimated:(BOOL)animated;
 - (void)updateIndicatorForIconView:(SBIconView*)iconView animated:(BOOL)animated;
@@ -317,6 +326,17 @@ static const CGFloat kMaxScale = 1.0;
 	}
 
 	return center;
+}
+
+- (void)removeAllBounceAnimations {
+
+	for (int i = 0; i < self.model.numberOfIcons; i++) {
+
+		SBIcon *icon = self.model.icons[i];
+		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:icon];
+
+		[iconView.layer removeAnimationForKey:@"jumping"];
+	}
 }
 
 - (void)updateIconTransforms {
@@ -719,9 +739,14 @@ static const CGFloat kMaxScale = 1.0;
 		return;
 	}
 
-	// Focus dock on animation target icon
+	// Remove jump animation if in progress
 
 	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];
+
+	[dockListView removeAllBounceAnimations];
+
+	// Focus dock on animation target icon
+
 	SBIconView *targetIconView = [dockListView.viewMap mappedIconViewForIcon:self.targetIcon];
 
 	if ([targetIconView isInDock]) {
@@ -758,6 +783,15 @@ static const CGFloat kMaxScale = 1.0;
 		_highlightView.hidden = true;
 		[self layoutBackgroundView];
 	}
+
+	// Layout iconBounceWindow
+
+	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];
+
+	CGRect frame = self.frame;
+	frame.origin.y += (self.bounds.size.height - [dockListView iconCenterY]) + ([dockListView collapsedIconWidth] / 2) + ([objc_getClass("SBIconBadgeView") _overhang].y * [dockListView collapsedIconScale]);
+
+	[[(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindow] setFrame:frame];
 }
 
 - (void)layoutBackgroundView {
