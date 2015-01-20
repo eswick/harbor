@@ -65,11 +65,13 @@
 
 @interface SBUIController ()
 
+@property (nonatomic, retain) HBPassthroughWindow *iconBounceWindowContainer;
 @property (nonatomic, retain) HBPassthroughWindow *iconBounceWindow;
 
 @end
 
 @hook SBUIController
+@synthesize iconBounceWindowContainer;
 @synthesize iconBounceWindow;
 
 - (id)init {
@@ -78,11 +80,15 @@
 	if (self) {
 
 		self.iconBounceWindow = [[HBPassthroughWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-		self.iconBounceWindow.windowLevel = UIWindowLevelAlert;
-
 		self.iconBounceWindow.hidden = false;
 
+		self.iconBounceWindowContainer = [[HBPassthroughWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+		self.iconBounceWindowContainer.windowLevel = UIWindowLevelAlert;
+		[self.iconBounceWindowContainer addSubview:self.iconBounceWindow];
+		self.iconBounceWindowContainer.hidden = false;
+
 		[self.iconBounceWindow release];
+		[self.iconBounceWindowContainer release];
 	}
 
 	return self;

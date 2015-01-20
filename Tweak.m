@@ -43,6 +43,7 @@
 @interface SBUIController ()
 
 @property (nonatomic, retain) UIWindow *iconBounceWindow;
+@property (nonatomic, retain) UIWindow *iconBounceWindowContainer;
 
 @end
 
@@ -785,13 +786,17 @@ static const CGFloat kMaxScale = 1.0;
 	}
 
 	// Layout iconBounceWindow
+	UIWindow *bounceWindow = [(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindow];
+	UIWindow *bounceWindowContainer = [(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindowContainer];
+	bounceWindowContainer.transform = CGAffineTransformMakeRotation([(SBUIController*)[objc_getClass("SBUIController") sharedInstance] _contentRotationForOrientation:[UIApp statusBarOrientation]]);
+	bounceWindowContainer.frame = [[UIScreen mainScreen] bounds];
 
 	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];
 
 	CGRect frame = self.frame;
 	frame.origin.y += (self.bounds.size.height - [dockListView iconCenterY]) + ([dockListView collapsedIconWidth] / 2) + ([objc_getClass("SBIconBadgeView") _overhang].y * [dockListView collapsedIconScale]);
 
-	[[(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindow] setFrame:frame];
+	[bounceWindow setFrame:frame];
 }
 
 - (void)layoutBackgroundView {
