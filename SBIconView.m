@@ -17,6 +17,8 @@
 
 #import "HBPreferences.h"
 
+#import <mach_verify/mach_verify.h>
+
 @interface HBPassthroughWindow : UIWindow
 @end
 
@@ -75,9 +77,12 @@
 @synthesize iconBounceWindow;
 
 - (id)init {
+
+	VERIFY_START(SBUIController_init);
+
 	self = @orig();
 
-	if (self) {
+	if (self && [[prefs getenabled] boolValue]) {
 
 		self.iconBounceWindow = [[HBPassthroughWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 		self.iconBounceWindow.hidden = false;
@@ -90,6 +95,8 @@
 		[self.iconBounceWindow release];
 		[self.iconBounceWindowContainer release];
 	}
+
+	VERIFY_STOP(SBUIController_init);
 
 	return self;
 }
@@ -112,6 +119,8 @@
 }
 
 - (id)initWithDefaultSize {
+	VERIFY_START(SBIconView_initWithDefaultSize);
+
 	self = @orig();
 	if (self && [[prefs getenabled] boolValue]) {
 
@@ -126,10 +135,16 @@
 
 		[self addSubview:self.indicatorView];
 	}
+
+	VERIFY_STOP(SBIconView_initWithDefaultSize);
+
 	return self;
 }
 
 - (void)bounce {
+
+	VERIFY_START(SBIconView_bounce);
+
 	CAKeyframeAnimation *animation = [CAKeyframeAnimation dockBounceAnimationWithIconHeight:[objc_getClass("SBIconView") defaultVisibleIconImageSize].height];
 	animation.delegate = self;
 
@@ -145,15 +160,25 @@
 	}
 
 	[self.layer addAnimation:animation forKey:@"jumping"];
+
+	VERIFY_STOP(SBIconView_bounce);
+
 }
 
 - (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
+
+	VERIFY_START(SBIconView_animationDidStop_finished);
+
 	if ([self isInDock]) {
 		[[[objc_getClass("SBIconController") sharedInstance] dockListView] addSubview:self];
 	}
+
+	VERIFY_STOP(SBIconView_animationDidStop_finished);
 }
 
 - (void)bounceTimerFired:(NSTimer*)timer {
+
+	VERIFY_START(SBIconView_bounceTimerFired);
 
 	if (self.bouncesRemaining == 0) {
 		[self stopBouncing];
@@ -168,9 +193,13 @@
 
 	if (self.bouncesRemaining != -1)
 		self.bouncesRemaining--;
+
+	VERIFY_STOP(SBIconView_bounceTimerFired);
 }
 
 - (void)startBouncing {
+
+	VERIFY_START(startBouncing);
 
 	if (self.bounceTimer)
 		[self stopBouncing];
@@ -190,16 +219,28 @@
 
 	[self.bounceTimer fire];
 
+	VERIFY_STOP(startBouncing);
+
 }
 
 - (void)stopBouncing {
+
+	VERIFY_START(stopBouncing);
+
 	if (self.bounceTimer) {
 		[self.bounceTimer invalidate];
 		self.bounceTimer = nil;
 	}
+
+	VERIFY_STOP(stopBouncing);
 }
 
 - (void)updateBouncingState {
+
+	VERIFY_START(updateBouncingState);
+
+	if (![[prefs getenabled] boolValue])
+		return;
 
 	if ([self.icon isKindOfClass:objc_getClass("SBApplicationIcon")]) {
 		SBApplicationIcon *appIcon = (SBApplicationIcon*)self.icon;
@@ -218,9 +259,13 @@
 		}
 
 	}
+
+	VERIFY_STOP(updateBouncingState);
 }
 
 - (void)_updateCloseBoxAnimated:(BOOL)arg1 {
+	VERIFY_START(_updateCloseBoxAnimated);
+
 	if (![[prefs getenabled] boolValue]) {
 		@orig(arg1);
 		return;
@@ -230,9 +275,13 @@
 		return;
 
 	@orig(arg1);
+
+	VERIFY_STOP(_updateCloseBoxAnimated);
 }
 
 - (void)updateIndicatorVisibility {
+
+	VERIFY_START(updateIndicatorVisibility);
 
 	if (![[prefs getenabled] boolValue])
 		return;
@@ -252,6 +301,8 @@
 	}
 
 	self.indicatorView.hidden = (![self isInDock] || !applicationRunning);
+
+	VERIFY_STOP(updateIndicatorVisibility);
 }
 
 - (void)layoutSubviews {
@@ -330,6 +381,8 @@
 
 - (void)publishBulletin:(BBBulletin*)arg1 destinations:(unsigned int)arg2 alwaysToLockScreen:(BOOL)arg3 {
 
+	VERIFY_START(publishBulletin);
+
 	SBApplicationIcon *icon = [[[objc_getClass("SBIconController") sharedInstance] model] applicationIconForBundleIdentifier:[arg1 sectionID]];
 	SBIconView *iconView = [[[[objc_getClass("SBIconController") sharedInstance] dockListView] viewMap] mappedIconViewForIcon:icon];
 
@@ -348,6 +401,8 @@
 	}
 
 	@orig(arg1, arg2, arg3);
+
+	VERIFY_STOP(publishBulletin);
 }
 
 @end
@@ -357,6 +412,8 @@
 @synthesize lastLaunchDate;
 
 - (void)_setActivationState:(int)arg1 {
+	VERIFY_START(_setActivationState);
+
 	@orig(arg1);
 
 	SBIcon *icon = [[[objc_getClass("SBIconController") sharedInstance] model] applicationIconForBundleIdentifier:self.bundleIdentifier];
@@ -369,6 +426,7 @@
 		[iconView updateBouncingState];
 	}
 
+	VERIFY_STOP(_setActivationState);
 }
 
 @end

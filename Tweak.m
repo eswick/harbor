@@ -624,6 +624,10 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (NSUInteger)columnAtPoint:(struct CGPoint)arg1 {
+
+	if (![[prefs getenabled] boolValue])
+		return @orig(arg1);
+
 	if (in_landscape) {
 		return 0;
 	}
@@ -637,6 +641,9 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (NSUInteger)rowAtPoint:(struct CGPoint)arg1 {
+	if (![[prefs getenabled] boolValue])
+		return @orig(arg1);
+
 	if (!in_landscape) {
 		return 0;
 	}
@@ -654,6 +661,10 @@ static const CGFloat kMaxScale = 1.0;
 	VERIFY_START(removeIconAtIndex);
 
 	@orig(arg1);
+
+	if (![[prefs getenabled] boolValue])
+		return;
+
 	[self collapseAnimated:true];
 
 	VERIFY_STOP(removeIconAtIndex);
@@ -902,14 +913,16 @@ when we are in safe mode
 #define harborPlistStore "file:///var/mobile/Library/SpringBoard/IconState_harbor.plist"
 
 - (BOOL)_save:(id)arg1 url:(id)arg2 error:(id *)arg3 {
-	if (@orig(arg1, [NSURL URLWithString:@harborPlistStore], arg3))
-		;
+
+	if ([[prefs getenabled] boolValue])
+		if (@orig(arg1, [NSURL URLWithString:@harborPlistStore], arg3))
+			;
 
 	return @orig(arg1, arg2, arg3);
 }
 
 - (id)_load:(NSURL*)path error:(id *)arg2 {
-	if ([[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/SpringBoard/IconState_harbor.plist"]) {
+	if ([[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/SpringBoard/IconState_harbor.plist"] && [[prefs getenabled] boolValue]) {
 		return @orig([NSURL URLWithString:@harborPlistStore], arg2);
 	}
 
