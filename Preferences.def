@@ -60,7 +60,7 @@ GROUP("", "For compatibility issues.", )
 
 PREF(NSNumber*, useNormalBackground, @(false), @"Use Normal Dock Background", PSSwitchCell, )
 
-GROUP("", "Follow for news on updates, deals, and new projects.", )
+GROUP("", "Follow for info on updates, deals, and new projects.", )
 
 RAW_ENTRY(PSButtonCell, @"action" : @"follow:", @"icon" : @"twitter.png", @"label" : @"@e_swick on Twitter", )
 
