@@ -58,10 +58,11 @@ NSArray* SpecifiersFromPlist (
       @"title" : @"Harbor",
 			@"items" : @[
 
-				#define GROUP(TITLE, FOOTER) @{ \
+				#define GROUP(TITLE, FOOTER, ...) @{ \
 					@"cell" : @"PSGroupCell", \
 					@"label" : @(TITLE), \
-					@"footerText" : @(FOOTER) \
+					@"footerText" : @(FOOTER), \
+          __VA_ARGS__ \
 				},
 
 				#define PREF(TYPE, NAME, DEFAULT, LABEL, CELL_TYPE, ...) @{ \
@@ -71,6 +72,11 @@ NSArray* SpecifiersFromPlist (
 					@"set" : @("set" #NAME ":forSpecifier:"), \
 					__VA_ARGS__ \
 				},
+
+        #define RAW_ENTRY(CELL, ...) @{ \
+          @"cell" : @#CELL, \
+          __VA_ARGS__ \
+        },
 
 				#include "Preferences.def"
 			]
@@ -106,6 +112,14 @@ NSArray* SpecifiersFromPlist (
 			[self reloadSpecifiers];
 		}
 	}
+}
+
+- (void)follow:(id)arg1{
+  if([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitter://"]]){
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"twitter://user?screen_name=e_swick"]];
+  }else{
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://www.twitter.com/e_swick"]];
+  }
 }
 
 @end

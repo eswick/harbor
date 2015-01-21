@@ -4,31 +4,35 @@
 #endif
 
 #ifndef GROUP
-#define GROUP(TITLE, FOOTER)
+#define GROUP(TITLE, FOOTER, ...)
+#endif
+
+#ifndef RAW_ENTRY
+#define RAW_ENTRY(CELL, ...)
 #endif
 
 #define is_iPad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 
 PREF(NSNumber*, enabled, @(true), @"Enabled", PSSwitchCell, )
 
-GROUP("Animation Duration", "")
+GROUP("Animation Duration", "", )
 
 PREF(NSNumber*, animationDuration, @(0.5), @"Animation Duration", PSSliderCell, @"showValue" : @(true), @"min" : @(0.1), @"max" : @(1.0))
 
-GROUP("Dock Margin", "")
+GROUP("Dock Margin", "", )
 
 PREF(NSNumber*, iconInset, is_iPad ? @(30.0) : @(15.0), @"Icon Inset", PSSliderCell, @"showValue" : @(true), @"min" : @(0.1), @"max" : is_iPad ? @(120.0) : @(80.0))
 
-GROUP("Wave Height", "")
+GROUP("Wave Height", "", )
 
 PREF(NSNumber*, evasionDistance, is_iPad ? @(120.0) : @(60.0), @"Evasion Distance", PSSliderCell, @"showValue" : @(true), @"min" : @(0.1), @"max" : is_iPad ? @(240.0) : @(180.0))
 
-GROUP("Wave Width", "")
+GROUP("Wave Width", "", )
 
 PREF(NSNumber*, effectiveRange, is_iPad ? @(200.0) : @(60.0), @"Effective Range", PSSliderCell, @"showValue" : @(true), @"min" : @(0.1), @"max" : is_iPad ? @(400.0) : @(180.0))
 
 
-GROUP("Bounce Options", "")
+GROUP("Bounce Options", "", )
 
 PREF(NSNumber*, bounceInterval, @(-1.0), @"Bounce", PSLinkListCell, @"detail" : @"PSListItemsController", \
 \
@@ -40,21 +44,28 @@ PREF(NSNumber*, bounceAboveApps, @(true), @"Bounce In Running Apps", PSSwitchCel
 
 PREF(NSNumber*, showBounceOnLockScreen, @(true), @"Bounce On Lock Screen", PSSwitchCell, )
 
-GROUP("", "Place the dock flush with the bottom of the screen.")
+GROUP("", "Place the dock flush with the bottom of the screen.", )
 
 PREF(NSNumber*, flushWithBottom, @(true), @"Flush With Bottom Edge", PSSwitchCell, )
 
-GROUP("", "Show app name when zoomed in.")
+GROUP("", "Show app name when zoomed in.", )
 
 PREF(NSNumber*, showIndicator, @(false), @"Show App Name Indicator", PSSwitchCell, )
 
-GROUP("", "Show Yosemite-style black dot below running apps.")
+GROUP("", "Show Yosemite-style black dot below running apps.", )
 
 PREF(NSNumber*, showStateIndicator, @(false), @"Show App State Dot", PSSwitchCell, )
 
-GROUP("", "For compatibility issues.")
+GROUP("", "For compatibility issues.", )
 
 PREF(NSNumber*, useNormalBackground, @(false), @"Use Normal Dock Background", PSSwitchCell, )
 
+GROUP("", "Follow for news on updates, deals, and new projects.", )
+
+RAW_ENTRY(PSButtonCell, @"action" : @"follow:", @"icon" : @"twitter.png", @"label" : @"@e_swick on Twitter", )
+
+GROUP("Copyright \u00A9 2015 Evan Swick. All rights reserved.", "", )
+
 #undef PREF
 #undef GROUP
+#undef RAW_ENTRY
