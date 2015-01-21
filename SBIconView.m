@@ -133,8 +133,15 @@
 	CAKeyframeAnimation *animation = [CAKeyframeAnimation dockBounceAnimationWithIconHeight:[objc_getClass("SBIconView") defaultVisibleIconImageSize].height];
 	animation.delegate = self;
 
-	if ([UIApp _accessibilityFrontMostApplication] && ![(SBUIController*)[objc_getClass("SBUIController") sharedInstance] isAppSwitcherShowing]) {
+	if ([UIApp isLocked]) {
+
+		if ([[prefs getshowBounceOnLockScreen] boolValue])
+			[[(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindow] addSubview:self];
+
+	} else if ([UIApp _accessibilityFrontMostApplication] && ![(SBUIController*)[objc_getClass("SBUIController") sharedInstance] isAppSwitcherShowing] && [[prefs getbounceAboveApps] boolValue]) {
+
 		[[(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindow] addSubview:self];
+
 	}
 
 	[self.layer addAnimation:animation forKey:@"jumping"];

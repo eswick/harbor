@@ -36,6 +36,10 @@ PREF(NSNumber*, bounceInterval, @(-1.0), @"Bounce", PSLinkListCell, @"detail" : 
 @"validValues" : @[@(0.0),   @(-1.0),  @(-2.0),   @(-3.0),             @(2.0),              @(5.0),             @(15.0),             @(30.0),           @(60.0),        @(60.0 * 1.5),        @(60.0 * 2),        @(60.0 * 2.5),       @(60.0 * 3) ,        @(60.0 * 5)],
 )
 
+PREF(NSNumber*, bounceAboveApps, @(true), @"Bounce In Running Apps", PSSwitchCell, )
+
+PREF(NSNumber*, showBounceOnLockScreen, @(true), @"Bounce On Lock Screen", PSSwitchCell, )
+
 GROUP("", "Place the dock flush with the bottom of the screen.")
 
 PREF(NSNumber*, flushWithBottom, @(true), @"Flush With Bottom Edge", PSSwitchCell, )
@@ -48,7 +52,7 @@ GROUP("", "Show Yosemite-style black dot below running apps.")
 
 PREF(NSNumber*, showStateIndicator, @(false), @"Show App State Dot", PSSwitchCell, )
 
-GROUP("", "Just for Aehmlo.")
+GROUP("", "For compatibility issues.")
 
 PREF(NSNumber*, useNormalBackground, @(false), @"Use Normal Dock Background", PSSwitchCell, )
 
