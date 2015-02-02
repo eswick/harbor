@@ -7,12 +7,12 @@ TARGET=iphone:8.1
 include theos/makefiles/common.mk
 
 #ENCRYPT=1
-#INSTALL_LOCAL=1
-#MAKE_SOURCE_DYLIB=1
+INSTALL_LOCAL=1
+MAKE_SOURCE_DYLIB=1
 
 TWEAK_NAME = Harbor
 
-export VERSION=0.9.1
+export VERSION=1.0.0
 Harbor_CFLAGS += -DVERSION=\"$(VERSION)\"
 
 ifdef MAKE_SOURCE_DYLIB

@@ -63,6 +63,8 @@
 
 @new
 - (CGFloat)horizontalIconBounds;
+- (CGFloat)iconPadding;
+- (CGFloat)collapsedIconPadding;
 - (CGFloat)collapsedIconScale;
 - (CGFloat)collapsedIconWidth;
 - (CGPoint)collapsedCenterForIcon:(SBIcon*)icon;
@@ -184,12 +186,20 @@ static const CGFloat kMaxScale = 1.0;
 		return 1;
 	}
 
-	return MIN(newIconSize / normalIconSize, 1);
+	return MIN(newIconSize / (normalIconSize + [self iconPadding]), 1);
 }
 
 
 - (CGFloat)collapsedIconWidth {
-	return [self collapsedIconScale] * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
+	return [self collapsedIconScale] * ([objc_getClass("SBIconView") defaultVisibleIconImageSize].width + [self iconPadding]);
+}
+
+- (CGFloat)iconPadding {
+	return [objc_getClass("SBIconView") defaultVisibleIconImageSize].width * [[prefs geticonPaddingMultipler] floatValue];
+}
+
+- (CGFloat)collapsedIconPadding {
+	return [self collapsedIconScale] * [self iconPadding];
 }
 
 
@@ -259,14 +269,12 @@ static const CGFloat kMaxScale = 1.0;
 		// Run twice, once for left side of focus, and one for right side of focus
 
 		for (int i = 0; i < iconsInRange; i++) {
-			self.maxTranslationX += ([self scaleForOffsetFromFocusPoint:offset] * defaultWidth) - [self collapsedIconWidth];
+			self.maxTranslationX += ([self scaleForOffsetFromFocusPoint:offset] * (defaultWidth + [self iconPadding])) - [self collapsedIconWidth];
 			offset += [self collapsedIconWidth];
 		}
 
 		offset = [self collapsedIconWidth]; // Set to collapsed icon width, so we skip the center icon on the second run
 	}
-
-	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width) / 2, 0);
 
 	[UIView animateWithDuration:animationDuration delay:0.0 usingSpringWithDamping:0.5 initialSpringVelocity:1 options:0 animations:^{
 
@@ -279,17 +287,7 @@ static const CGFloat kMaxScale = 1.0;
 
 			iconView.location = [self iconLocation];
 
-			CGPoint center = CGPointZero;
-
-			if (!in_landscape) {
-				center.x = xOffset + ([self collapsedIconWidth] * i) + ([self collapsedIconWidth] / 2) + (self.bounds.size.width - [self horizontalIconBounds]) / 2;
-				center.y = [self iconCenterY];
-			} else {
-				center.x = [self iconCenterY];
-				center.y = xOffset + ([self collapsedIconWidth] * i) + ([self collapsedIconWidth] / 2) + (self.bounds.size.height - [self horizontalIconBounds]) / 2;
-			}
-
-			iconView.center = center;
+			iconView.center = [self collapsedCenterForIcon:icon];
 		}
 
 		if (self.activatingIcon) {
@@ -314,7 +312,7 @@ static const CGFloat kMaxScale = 1.0;
 - (CGPoint)collapsedCenterForIcon:(SBIcon*)icon {
 	CGFloat defaultWidth = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 
-	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * defaultWidth) / 2, 0);
+	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * (defaultWidth + [self iconPadding])) / 2, 0);
 
 	CGPoint center = CGPointZero;
 
@@ -632,8 +630,8 @@ static const CGFloat kMaxScale = 1.0;
 		return 0;
 	}
 
-	CGFloat collapsedItemWidth = [self collapsedIconScale] * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
-	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width) / 2, 0);
+	CGFloat collapsedItemWidth = [self collapsedIconWidth];
+	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * ([objc_getClass("SBIconView") defaultVisibleIconImageSize].width + [self iconPadding])) / 2, 0);
 
 	NSUInteger index = floorf((arg1.x - (self.bounds.size.width - [self horizontalIconBounds]) / 2 - xOffset) / collapsedItemWidth);
 
@@ -648,8 +646,8 @@ static const CGFloat kMaxScale = 1.0;
 		return 0;
 	}
 
-	CGFloat collapsedItemWidth = [self collapsedIconScale] * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
-	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * [objc_getClass("SBIconView") defaultVisibleIconImageSize].width) / 2, 0);
+	CGFloat collapsedItemWidth = [self collapsedIconWidth];
+	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * ([objc_getClass("SBIconView") defaultVisibleIconImageSize].width + [self iconPadding])) / 2, 0);
 
 	NSUInteger index = floorf((arg1.y - (self.bounds.size.height - [self horizontalIconBounds]) / 2 - xOffset) / collapsedItemWidth);
 
