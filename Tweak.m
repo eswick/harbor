@@ -675,14 +675,14 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)_cleanupAnimation {
 
-	VERIFY_START(_cleanupAnimation);
+	VERIFY_START(_cleanupAnimation1);
 
 	@orig();
 	if (![[prefs getenabled] boolValue])
 		return;
 	[[[objc_getClass("SBIconController") sharedInstance] dockListView] collapseAnimated:true];
 
-	VERIFY_STOP(_cleanupAnimation);
+	VERIFY_STOP(_cleanupAnimation1);
 }
 
 @end

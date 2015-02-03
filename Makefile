@@ -6,9 +6,9 @@ TARGET=iphone:8.1
 
 include theos/makefiles/common.mk
 
+#INSTALL_LOCAL=1
+#MAKE_SOURCE_DYLIB=1
 #ENCRYPT=1
-INSTALL_LOCAL=1
-MAKE_SOURCE_DYLIB=1
 
 TWEAK_NAME = Harbor
 
@@ -20,6 +20,11 @@ Harbor_FILES += Tweak.m SBIconView.m CAKeyframeAnimation+dockBounce.m HBPreferen
 Harbor_FILES += extensions/UIView+Origin.m
 
 Harbor_CFLAGS += -Iinclude -Iextensions -fobjc-logos -Wno-objc-missing-super-calls -Wno-unused-function -mno-thumb
+
+ifdef ENCRYPT
+Harbor_CFLAGS += -DMACH_ENCRYPT -DMACH_VERIFY_UDID
+endif
+
 Harbor_FRAMEWORKS += CoreGraphics UIKit QuartzCore
 Harbor_PRIVATE_FRAMEWORKS += SpringBoardFoundation
 else
@@ -37,7 +42,7 @@ ifdef ENCRYPT
 after-Harbor-all::
 	cp $(THEOS_OBJ_DIR)/$(THEOS_CURRENT_INSTANCE)$(TARGET_LIB_EXT) $(THEOS_OBJ_DIR)/$(THEOS_CURRENT_INSTANCE)$(TARGET_LIB_EXT).tmp
 	rm $(THEOS_OBJ_DIR)/$(THEOS_CURRENT_INSTANCE)$(TARGET_LIB_EXT)
-	/Users/eswick/Development/mach_pwn/mach_pwn $(THEOS_OBJ_DIR)/$(THEOS_CURRENT_INSTANCE)$(TARGET_LIB_EXT).tmp -u dde801e7aec33de0904e5d352478809e8b63fbba -o $(THEOS_OBJ_DIR)/$(THEOS_CURRENT_INSTANCE)$(TARGET_LIB_EXT)
+	/Users/eswick/Development/mach_pwn/mach_pwn $(THEOS_OBJ_DIR)/$(THEOS_CURRENT_INSTANCE)$(TARGET_LIB_EXT).tmp -u edcc87b0f5f23ab5c8c45c2e78264b2a1007acfe -o $(THEOS_OBJ_DIR)/$(THEOS_CURRENT_INSTANCE)$(TARGET_LIB_EXT)
 	strip -u -r $(THEOS_OBJ_DIR)/$(THEOS_CURRENT_INSTANCE)$(TARGET_LIB_EXT)
 endif
 endif
