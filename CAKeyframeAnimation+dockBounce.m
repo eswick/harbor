@@ -1,4 +1,9 @@
 
+#define UIApp ([UIApplication sharedApplication])
+
+#define cur_orientation ([UIApp statusBarOrientation])
+#define in_landscape (UIInterfaceOrientationIsLandscape(cur_orientation) && UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad)
+
 @implementation CAKeyframeAnimation (DockBounce)
 
 + (CAKeyframeAnimation *)dockBounceAnimationWithIconHeight:(CGFloat)iconHeight {
@@ -11,11 +16,17 @@
   {
     CGFloat positionOffset = factors[i]/128.0f * iconHeight;
 
-    //CATransform3D transform = CATransform3DMakeTranslation(0, , 0);
     [values addObject:[NSNumber numberWithFloat:-positionOffset]];
   }
 
-  CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+  CAKeyframeAnimation *animation;
+
+  if (in_landscape) {
+    animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.x"];
+  } else {
+    animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
+  }
+
   animation.repeatCount = 1;
   animation.duration = 32.0f/30.0f;
   animation.fillMode = kCAFillModeForwards;

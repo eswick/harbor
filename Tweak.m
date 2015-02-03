@@ -803,7 +803,12 @@ static const CGFloat kMaxScale = 1.0;
 	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];
 
 	CGRect frame = self.frame;
-	frame.origin.y += (self.bounds.size.height - [dockListView iconCenterY]) + ([dockListView collapsedIconWidth] / 2) + ([objc_getClass("SBIconBadgeView") _overhang].y * [dockListView collapsedIconScale]);
+
+	if (in_landscape) {
+		frame.origin.x += (self.bounds.size.width - [dockListView iconCenterY]) + ([dockListView collapsedIconWidth] / 2) + ([objc_getClass("SBIconBadgeView") _overhang].x * [dockListView collapsedIconScale]);
+	} else {
+		frame.origin.y += (self.bounds.size.height - [dockListView iconCenterY]) + ([dockListView collapsedIconWidth] / 2) + ([objc_getClass("SBIconBadgeView") _overhang].y * [dockListView collapsedIconScale]);
+	}
 
 	[bounceWindow setFrame:frame];
 }
