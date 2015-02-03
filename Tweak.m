@@ -488,8 +488,7 @@ static const CGFloat kMaxScale = 1.0;
 		iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:self.focusPoint]]];
 	} @catch (NSException *e) { }
 
-	if ((in_landscape ? [[touches anyObject] locationInView:self].x : [[touches anyObject] locationInView:self].y) < 0 && ![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) {
-
+	if ((in_landscape ? [[touches anyObject] locationInView:self].x : [[touches anyObject] locationInView:self].y) < 0 && (![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) && ((![[objc_getClass("SBIconController") sharedInstance] isEditing] && [[prefs getinitiateEditMode] boolValue]) || [[objc_getClass("SBIconController") sharedInstance] isEditing]) ) {
 		// get origin, remove transform, restore origin
 		CGPoint origin = iconView.origin;
 		iconView.transform = CGAffineTransformIdentity;
