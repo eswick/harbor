@@ -632,9 +632,12 @@ static const CGFloat kMaxScale = 1.0;
 	CGFloat collapsedItemWidth = [self collapsedIconWidth];
 	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * ([objc_getClass("SBIconView") defaultVisibleIconImageSize].width + [self iconPadding])) / 2, 0);
 
-	NSUInteger index = floorf((arg1.x - (self.bounds.size.width - [self horizontalIconBounds]) / 2 - xOffset) / collapsedItemWidth);
+	NSInteger index = floorf((arg1.x - (self.bounds.size.width - [self horizontalIconBounds]) / 2 - xOffset) / collapsedItemWidth);
 
-	return index;
+	if (index < 0)
+		index = NSNotFound;
+
+	return (NSUInteger)index;
 }
 
 - (NSUInteger)rowAtPoint:(struct CGPoint)arg1 {
@@ -648,9 +651,12 @@ static const CGFloat kMaxScale = 1.0;
 	CGFloat collapsedItemWidth = [self collapsedIconWidth];
 	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * ([objc_getClass("SBIconView") defaultVisibleIconImageSize].width + [self iconPadding])) / 2, 0);
 
-	NSUInteger index = floorf((arg1.y - (self.bounds.size.height - [self horizontalIconBounds]) / 2 - xOffset) / collapsedItemWidth);
+	NSInteger index = floorf((arg1.y - (self.bounds.size.height - [self horizontalIconBounds]) / 2 - xOffset) / collapsedItemWidth);
 
-	return index;
+	if (index < 0)
+		index = NSNotFound;
+
+	return (NSUInteger)index;
 }
 
 - (void)removeIconAtIndex:(NSUInteger)arg1 {
