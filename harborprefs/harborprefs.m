@@ -42,13 +42,13 @@ NSArray* SpecifiersFromPlist (
 
 #include "Preferences.def"
 
-- (void)viewDidAppear:(_Bool)arg1{
+/*- (void)viewDidAppear:(_Bool)arg1{
   [super viewDidAppear:arg1];
   if(![[NSFileManager defaultManager] fileExistsAtPath:DYLIB_INSTALL_PATH]){
     HBDownloadController *controller = [[HBDownloadController alloc] init];
     [controller beginDownload];
   }
-}
+}*/
 
 - (id)specifiers {
 
