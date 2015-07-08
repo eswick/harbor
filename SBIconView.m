@@ -17,7 +17,6 @@
 
 #import "HBPreferences.h"
 
-#import <mach_verify/mach_verify.h>
 
 @interface HBPassthroughWindow : UIWindow
 @end
@@ -35,8 +34,9 @@
 @property (nonatomic, retain) UIView *indicatorView;
 @property (nonatomic, retain) NSTimer *bounceTimer;
 @property (nonatomic, assign) int bouncesRemaining;
+@property (nonatomic, assign) NSNumber *_bouncesRemaining;
 
-@new
+
 - (void)updateIndicatorVisibility;
 
 - (void)bounce;
@@ -72,15 +72,15 @@
 
 @end
 
-@hook SBUIController
-@synthesize iconBounceWindowContainer;
-@synthesize iconBounceWindow;
+%hook SBUIController
+%property (nonatomic, retain) HBPassthroughWindow *iconBounceWindowContainer;
+%property (nonatomic, retain) HBPassthroughWindow *iconBounceWindow;
 
 - (id)init {
 
-	VERIFY_START(SBUIController_init);
 
-	self = @orig();
+
+	self = %orig();
 
 	if (self && [[prefs getenabled] boolValue]) {
 
@@ -96,32 +96,43 @@
 		[self.iconBounceWindowContainer release];
 	}
 
-	VERIFY_STOP(SBUIController_init);
+
 
 	return self;
 }
 
-@end
+%end
 
-@hook SBIconView
-@synthesize indicatorView;
-@synthesize bounceTimer;
-@synthesize bouncesRemaining;
+%hook SBIconView
+
+%property (nonatomic, retain) UIView *indicatorView;
+%property (nonatomic, retain) NSTimer *bounceTimer;
+%property (nonatomic, assign) NSNumber *_bouncesRemaining;
+
+%new
+- (int)bouncesRemaining {
+	return [self._bouncesRemaining intValue];
+}
+
+%new
+- (void)setBouncesRemaining:(int)value {
+	self._bouncesRemaining = @(value);
+}
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
 	if (![[prefs getenabled] boolValue])
-		return @orig(point, event);
+		return %orig(point, event);
 
 	if ([self isInDock])
 		return nil;
 
-	return @orig(point, event);
+	return %orig(point, event);
 }
 
 - (id)initWithDefaultSize {
-	VERIFY_START(SBIconView_initWithDefaultSize);
 
-	self = @orig();
+
+	self = %orig();
 	if (self && [[prefs getenabled] boolValue]) {
 
 		self.indicatorView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 5, 5)];
@@ -136,14 +147,15 @@
 		[self addSubview:self.indicatorView];
 	}
 
-	VERIFY_STOP(SBIconView_initWithDefaultSize);
+
 
 	return self;
 }
 
+%new
 - (void)bounce {
 
-	VERIFY_START(SBIconView_bounce);
+
 
 	CAKeyframeAnimation *animation = [CAKeyframeAnimation dockBounceAnimationWithIconHeight:[objc_getClass("SBIconView") defaultVisibleIconImageSize].height];
 	animation.delegate = self;
@@ -161,24 +173,26 @@
 
 	[self.layer addAnimation:animation forKey:@"jumping"];
 
-	VERIFY_STOP(SBIconView_bounce);
+
 
 }
 
+%new
 - (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
 
-	VERIFY_START(SBIconView_animationDidStop_finished);
+
 
 	if ([self isInDock]) {
 		[[[objc_getClass("SBIconController") sharedInstance] dockListView] addSubview:self];
 	}
 
-	VERIFY_STOP(SBIconView_animationDidStop_finished);
+
 }
 
+%new
 - (void)bounceTimerFired:(NSTimer*)timer {
 
-	VERIFY_START(SBIconView_bounceTimerFired);
+
 
 	if (self.bouncesRemaining == 0) {
 		[self stopBouncing];
@@ -194,12 +208,13 @@
 	if (self.bouncesRemaining != -1)
 		self.bouncesRemaining--;
 
-	VERIFY_STOP(SBIconView_bounceTimerFired);
+
 }
 
+%new
 - (void)startBouncing {
 
-	VERIFY_START(startBouncing);
+
 
 	if (self.bounceTimer)
 		[self stopBouncing];
@@ -219,25 +234,27 @@
 
 	[self.bounceTimer fire];
 
-	VERIFY_STOP(startBouncing);
+
 
 }
 
+%new
 - (void)stopBouncing {
 
-	VERIFY_START(stopBouncing);
+
 
 	if (self.bounceTimer) {
 		[self.bounceTimer invalidate];
 		self.bounceTimer = nil;
 	}
 
-	VERIFY_STOP(stopBouncing);
+
 }
 
+%new
 - (void)updateBouncingState {
 
-	VERIFY_START(updateBouncingState);
+
 
 	if (![[prefs getenabled] boolValue])
 		return;
@@ -260,28 +277,29 @@
 
 	}
 
-	VERIFY_STOP(updateBouncingState);
+
 }
 
 - (void)_updateCloseBoxAnimated:(BOOL)arg1 {
-	VERIFY_START(_updateCloseBoxAnimated);
+
 
 	if (![[prefs getenabled] boolValue]) {
-		@orig(arg1);
+		%orig(arg1);
 		return;
 	}
 
 	if ([self isInDock] && [self isEditing])
 		return;
 
-	@orig(arg1);
+	%orig(arg1);
 
-	VERIFY_STOP(_updateCloseBoxAnimated);
+
 }
 
+%new
 - (void)updateIndicatorVisibility {
 
-	VERIFY_START(updateIndicatorVisibility);
+
 
 	if (![[prefs getenabled] boolValue])
 		return;
@@ -302,24 +320,24 @@
 
 	self.indicatorView.hidden = (![self isInDock] || !applicationRunning);
 
-	VERIFY_STOP(updateIndicatorVisibility);
+
 }
 
 - (void)layoutSubviews {
 	if (![[prefs getenabled] boolValue]) {
-		@orig();
-		_labelView.hidden = false;
+		%orig();
+		MSHookIvar<UIView*>(self, "_labelView").hidden = false;
 		self.indicatorView.hidden = true;
 		return;
 	}
 
-	@orig();
+	%orig();
 	[self updateIndicatorVisibility];
 
 	if ([self isInDock]) {
-		_labelView.hidden = true;
+		MSHookIvar<UIView*>(self, "_labelView").hidden = true;
 	}else{
-		_labelView.hidden = false;
+		MSHookIvar<UIView*>(self, "_labelView").hidden = false;
 	}
 }
 
@@ -329,61 +347,61 @@
 
 - (void)touchesEnded:(id)arg1 withEvent:(id)arg2{
 	if (![[prefs getenabled] boolValue]) {
-		@orig(arg1, arg2);
+		%orig(arg1, arg2);
 		return;
 	}
 
 	if ([self isInDock] && !self.isGrabbed)
 		super(arg1, arg2);
 	else
-		@orig(arg1, arg2);
+		%orig(arg1, arg2);
 }
 
 - (void)touchesMoved:(id)arg1 withEvent:(id)arg2{
 	if (![[prefs getenabled] boolValue]) {
-		@orig(arg1, arg2);
+		%orig(arg1, arg2);
 		return;
 	}
 
 	if ([self isInDock] && !self.isGrabbed)
 		super(arg1, arg2);
 	else
-		@orig(arg1, arg2);
+		%orig(arg1, arg2);
 }
 
 - (void)touchesBegan:(id)arg1 withEvent:(id)arg2{
 	if (![[prefs getenabled] boolValue]) {
-		@orig(arg1, arg2);
+		%orig(arg1, arg2);
 		return;
 	}
 
 	if ([self isInDock] && !self.isGrabbed)
 		super(arg1, arg2);
 	else
-		@orig(arg1, arg2);
+		%orig(arg1, arg2);
 }
 
 - (void)touchesCancelled:(id)arg1 withEvent:(id)arg2{
 	if (![[prefs getenabled] boolValue]) {
-		@orig(arg1, arg2);
+		%orig(arg1, arg2);
 		return;
 	}
 
 	if ([self isInDock] && !self.isGrabbed)
 		super(arg1, arg2);
 	else
-		@orig(arg1, arg2);
+		%orig(arg1, arg2);
 }
 
-@end
+%end
 
-@hook BBServer
+%hook BBServer
 
 - (void)publishBulletin:(BBBulletin*)arg1 destinations:(unsigned int)arg2 alwaysToLockScreen:(BOOL)arg3 {
 
-	VERIFY_START(publishBulletin);
 
-	SBApplicationIcon *icon = [[[objc_getClass("SBIconController") sharedInstance] model] applicationIconForBundleIdentifier:[arg1 sectionID]];
+
+	SBApplicationIcon *icon = [(SBIconModel*)[[objc_getClass("SBIconController") sharedInstance] model] applicationIconForBundleIdentifier:[arg1 sectionID]];
 	SBIconView *iconView = [[[[objc_getClass("SBIconController") sharedInstance] dockListView] viewMap] mappedIconViewForIcon:icon];
 
 	SBApplication *app = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:[arg1 sectionID]];
@@ -400,23 +418,23 @@
 		}
 	}
 
-	@orig(arg1, arg2, arg3);
+	%orig(arg1, arg2, arg3);
 
-	VERIFY_STOP(publishBulletin);
+
 }
 
-@end
+%end
 
-@hook SBApplication
-@synthesize lastNotificationDate;
-@synthesize lastLaunchDate;
+%hook SBApplication
+%property (nonatomic, retain) NSDate *lastNotificationDate;
+%property (nonatomic, retain) NSDate *lastLaunchDate;
 
 - (void)_setActivationState:(int)arg1 {
-	VERIFY_START(_setActivationState);
 
-	@orig(arg1);
 
-	SBIcon *icon = [[[objc_getClass("SBIconController") sharedInstance] model] applicationIconForBundleIdentifier:self.bundleIdentifier];
+	%orig(arg1);
+
+	SBIcon *icon = [(SBIconModel*)[[objc_getClass("SBIconController") sharedInstance] model] applicationIconForBundleIdentifier:self.bundleIdentifier];
 	SBIconView *iconView = [[[[objc_getClass("SBIconController") sharedInstance] dockListView] viewMap] mappedIconViewForIcon:icon];
 
 	[iconView updateIndicatorVisibility];
@@ -426,7 +444,7 @@
 		[iconView updateBouncingState];
 	}
 
-	VERIFY_STOP(_setActivationState);
+
 }
 
-@end
+%end

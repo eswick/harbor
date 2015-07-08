@@ -22,8 +22,6 @@
 
 #import "HBPreferences.h"
 
-#import <mach_verify/mach_verify.h>
-
 #pragma mark Declarations
 
 #define UIApp ([UIApplication sharedApplication])
@@ -35,7 +33,6 @@
 
 @interface SBRootFolderView ()
 
-@new
 - (void)orientationChanged:(NSNotification*)arg1;
 
 @end
@@ -49,7 +46,7 @@
 
 @interface SBDockIconListView ()
 
-@property (nonatomic, assign) CGFloat focusPoint;
+/*@property (nonatomic, assign) CGFloat focusPoint;
 @property (nonatomic, assign) BOOL trackingTouch;
 @property (nonatomic, assign) BOOL appLaunching;
 @property (nonatomic, assign) SBIconView *activatingIcon;
@@ -59,9 +56,8 @@
 
 @property (nonatomic, retain) UIView *indicatorView;
 @property (nonatomic, assign) UILabel *indicatorLabel;
-@property (nonatomic, assign) SBIconView *focusedIconView;
+@property (nonatomic, assign) SBIconView *focusedIconView;*/
 
-@new
 - (CGFloat)horizontalIconBounds;
 - (CGFloat)iconPadding;
 - (CGFloat)collapsedIconPadding;
@@ -83,7 +79,6 @@
 
 @interface SBDockView ()
 
-@new
 - (void)layoutBackgroundView;
 
 @end
@@ -96,87 +91,81 @@ static const CGFloat kMaxScale = 1.0;
 
 #pragma mark -
 
-@hook SBDockIconListView
+%hook SBDockIconListView
 
-@synthesize focusPoint;
-@synthesize trackingTouch;
-@synthesize appLaunching;
-@synthesize activatingIcon;
+static CGFloat focusPoint;
+static BOOL trackingTouch;
+static BOOL appLaunching;
+static SBIconView *activatingIcon;
 
-@synthesize maxTranslationX;
-@synthesize xTranslationDamper;
+static CGFloat maxTranslationX;
+static CGFloat xTranslationDamper;
 
-@synthesize indicatorView;
-@synthesize indicatorLabel;
-@synthesize focusedIconView;
+static UIView *indicatorView;
+static UILabel *indicatorLabel;
 
 + (NSUInteger)iconColumnsForInterfaceOrientation:(NSInteger)arg1{
 	if (![[prefs getenabled] boolValue])
-		return @orig(arg1);
+		return %orig(arg1);
 	return 100;
 }
 
 - (id)initWithModel:(id)arg1 orientation:(NSInteger)arg2 viewMap:(id)arg3 {
-	VERIFY_START(initWithModel_orientation_viewMap);
-	self = @orig(arg1, arg2, arg3);
+
+	self = %orig(arg1, arg2, arg3);
 	if (self) {
 
-		self.trackingTouch = false;
-		self.appLaunching = false;
+		trackingTouch = false;
+		appLaunching = false;
 
 		// Set up indicator view
-		self.indicatorView = [[UIView alloc] init];
+		indicatorView = [[UIView alloc] init];
 
-		self.indicatorView.clipsToBounds = true;
-		self.indicatorView.layer.cornerRadius = 5;
+		indicatorView.clipsToBounds = true;
+		indicatorView.layer.cornerRadius = 5;
 
 		// Add background view
 		SBWallpaperEffectView *indicatorBackgroundView = [[objc_getClass("SBWallpaperEffectView") alloc] initWithWallpaperVariant:1];
 		indicatorBackgroundView.style = 11;
 		indicatorBackgroundView.translatesAutoresizingMaskIntoConstraints = false;
 
-		[self.indicatorView addSubview:indicatorBackgroundView];
-		[indicatorBackgroundView release];
+		[indicatorView addSubview:indicatorBackgroundView];
 
 		// Set up label
-		UILabel *indicatorLabel = [[UILabel alloc] init];
+		indicatorLabel = [[UILabel alloc] init];
 		indicatorLabel.font = [UIFont systemFontOfSize:14];
 		indicatorLabel.textColor = [UIColor whiteColor];
 		indicatorLabel.textAlignment = NSTextAlignmentCenter;
-		[self.indicatorView addSubview:indicatorLabel];
-		self.indicatorLabel = indicatorLabel;
-
-		[indicatorLabel release];
+		[indicatorView addSubview:indicatorLabel];
 
 		// Setup constraints
 		NSMutableArray *constraints = [NSMutableArray new];
 
 		[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[v]-0-|" options:0 metrics:nil views: @{ @"v" : indicatorBackgroundView }]];
 		[constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[v]-0-|" options:0 metrics:nil views: @{ @"v" : indicatorBackgroundView }]];
-		[self.indicatorView addConstraints:constraints];
+		[indicatorView addConstraints:constraints];
 
 		[constraints release];
 
 		// -
 
-		[self addSubview:self.indicatorView];
-		[self.indicatorView release];
+		[self addSubview:indicatorView];
 
 	}
 
-	VERIFY_STOP(initWithModel_orientation_viewMap);
+
 
 	return self;
 }
 
 #pragma mark Layout
 
-
+%new
 - (CGFloat)horizontalIconBounds {
 	return (in_landscape ? self.bounds.size.height : self.bounds.size.width) - [[prefs geticonInset] floatValue] * 2;
 }
 
-
+%new
 - (CGFloat)collapsedIconScale {
 	CGFloat normalIconSize = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 
@@ -189,20 +178,22 @@ static const CGFloat kMaxScale = 1.0;
 	return MIN(newIconSize / (normalIconSize + [self iconPadding]), 1);
 }
 
-
+%new
 - (CGFloat)collapsedIconWidth {
 	return [self collapsedIconScale] * ([objc_getClass("SBIconView") defaultVisibleIconImageSize].width + [self iconPadding]);
 }
 
+%new
 - (CGFloat)iconPadding {
 	return [objc_getClass("SBIconView") defaultVisibleIconImageSize].width * [[prefs geticonPaddingMultipler] floatValue];
 }
 
+%new
 - (CGFloat)collapsedIconPadding {
 	return [self collapsedIconScale] * [self iconPadding];
 }
 
-
+%new
 - (CGFloat)scaleForOffsetFromFocusPoint:(CGFloat)offset {
 
 	if (fabs(offset) > [[prefs geteffectiveRange] doubleValue])
@@ -211,16 +202,16 @@ static const CGFloat kMaxScale = 1.0;
 	return MAX((cos(offset / (([[prefs geteffectiveRange] doubleValue]) / M_PI)) + 1.0) / (1.0 / ((kMaxScale - [self collapsedIconScale]) / 2.0)) + [self collapsedIconScale], [self collapsedIconScale]);
 }
 
-
+%new
 - (CGFloat)xTranslationForOffsetFromFocusPoint:(CGFloat)offset {
 
-	if (self.xTranslationDamper == 0)
-		self.xTranslationDamper = 1;
+	if (xTranslationDamper == 0)
+		xTranslationDamper = 1;
 
-	return -(atan(offset / (self.xTranslationDamper * (M_PI / 4))) * ((self.maxTranslationX) / (M_PI / 2)));
+	return -(atan(offset / (xTranslationDamper * (M_PI / 4))) * ((maxTranslationX) / (M_PI / 2)));
 }
 
-
+%new
 - (CGFloat)yTranslationForOffsetFromFocusPoint:(CGFloat)offset {
 
 	if (fabs(offset) > [[prefs geteffectiveRange] doubleValue])
@@ -230,14 +221,15 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 - (void)updateEditingStateAnimated:(BOOL)arg1 {
-	VERIFY_START(updateEditingStateAnimated);
-	@orig(arg1);
+
+	%orig(arg1);
 	if (![[prefs getenabled] boolValue])
 		return;
 	[self layoutIconsIfNeeded:0.0 domino:false];
-	VERIFY_STOP(updateEditingStateAnimated);
+
 }
 
+%new
 - (CGFloat)iconCenterY {
 
 	if ([[prefs getflushWithBottom] boolValue]) {
@@ -251,14 +243,14 @@ static const CGFloat kMaxScale = 1.0;
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
 
 	if (![[prefs getenabled] boolValue]) {
-		@orig(animationDuration, arg2);
+		%orig(animationDuration, arg2);
 		return;
 	}
 
 	CGFloat defaultWidth = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 
-	self.xTranslationDamper = acos(([[prefs geteffectiveRange] doubleValue] * [self collapsedIconScale]) / ([[prefs geteffectiveRange] doubleValue] / 2) - 1) * ([[prefs geteffectiveRange] doubleValue] / M_PI);
-	self.maxTranslationX = 0;
+	xTranslationDamper = acos(([[prefs geteffectiveRange] doubleValue] * [self collapsedIconScale]) / ([[prefs geteffectiveRange] doubleValue] / 2) - 1) * ([[prefs geteffectiveRange] doubleValue] / M_PI);
+	maxTranslationX = 0;
 
 	// Calculate total X translation
 
@@ -269,7 +261,7 @@ static const CGFloat kMaxScale = 1.0;
 		// Run twice, once for left side of focus, and one for right side of focus
 
 		for (int i = 0; i < iconsInRange; i++) {
-			self.maxTranslationX += ([self scaleForOffsetFromFocusPoint:offset] * (defaultWidth + [self iconPadding])) - [self collapsedIconWidth];
+			maxTranslationX += ([self scaleForOffsetFromFocusPoint:offset] * (defaultWidth + [self iconPadding])) - [self collapsedIconWidth];
 			offset += [self collapsedIconWidth];
 		}
 
@@ -290,8 +282,8 @@ static const CGFloat kMaxScale = 1.0;
 			iconView.center = [self collapsedCenterForIcon:icon];
 		}
 
-		if (self.activatingIcon) {
-			self.focusPoint = in_landscape ? self.activatingIcon.center.y : self.activatingIcon.center.x;
+		if (activatingIcon) {
+			focusPoint = in_landscape ? activatingIcon.center.y : activatingIcon.center.x;
 		}
 
 		[self updateIconTransforms];
@@ -303,12 +295,13 @@ static const CGFloat kMaxScale = 1.0;
 		}
 	} completion:nil];
 
-	if (self.activatingIcon) {
-		[self bringSubviewToFront:self.activatingIcon];
+	if (activatingIcon) {
+		[self bringSubviewToFront:activatingIcon];
 	}
 
 }
 
+%new
 - (CGPoint)collapsedCenterForIcon:(SBIcon*)icon {
 	CGFloat defaultWidth = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
 
@@ -327,6 +320,7 @@ static const CGFloat kMaxScale = 1.0;
 	return center;
 }
 
+%new
 - (void)removeAllBounceAnimations {
 
 	for (int i = 0; i < self.model.numberOfIcons; i++) {
@@ -338,13 +332,14 @@ static const CGFloat kMaxScale = 1.0;
 	}
 }
 
+%new
 - (void)updateIconTransforms {
 
 	for (int i = 0; i < self.model.numberOfIcons; i++) {
 		SBIcon *icon = self.model.icons[i];
 		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:icon];
 
-		const CGFloat offsetFromFocusPoint = self.focusPoint - (in_landscape ? iconView.center.y : iconView.center.x);
+		const CGFloat offsetFromFocusPoint = focusPoint - (in_landscape ? iconView.center.y : iconView.center.x);
 
 
 		CGFloat scale = [self collapsedIconScale];
@@ -352,7 +347,7 @@ static const CGFloat kMaxScale = 1.0;
 		CGFloat tx = 0;
 		CGFloat ty = 0;
 
-		if (self.trackingTouch) {
+		if (trackingTouch) {
 			scale = [self scaleForOffsetFromFocusPoint:offsetFromFocusPoint];
 			ty = [self yTranslationForOffsetFromFocusPoint:offsetFromFocusPoint];
 			tx = [self xTranslationForOffsetFromFocusPoint:offsetFromFocusPoint];
@@ -376,13 +371,13 @@ static const CGFloat kMaxScale = 1.0;
 
 }
 
-
+%new
 - (void)updateIndicatorForIconView:(SBIconView*)iconView animated:(BOOL)animated {
 
-	VERIFY_START(updateIndicatorForIconView_animated);
+
 
 	if (![[prefs getshowIndicator] boolValue]) {
-		self.indicatorView.hidden = true;
+		indicatorView.hidden = true;
 		return;
 	}
 
@@ -390,26 +385,26 @@ static const CGFloat kMaxScale = 1.0;
 
 		if (animated) {
 			[UIView animateWithDuration:0.2 animations:^{
-				self.indicatorView.alpha = 0;
+				indicatorView.alpha = 0;
 			} completion:^(BOOL finished) {
-				self.indicatorView.hidden = true;
-				self.indicatorView.alpha = 1;
+				indicatorView.hidden = true;
+				indicatorView.alpha = 1;
 			}];
 		}else{
-			self.indicatorView.hidden = true;
+			indicatorView.hidden = true;
 		}
 
 		return;
 	}else{
-		if (animated && self.indicatorView.hidden) {
-			self.indicatorView.alpha = 0;
-			self.indicatorView.hidden = false;
+		if (animated && indicatorView.hidden) {
+			indicatorView.alpha = 0;
+			indicatorView.hidden = false;
 
 			[UIView animateWithDuration:0.2 animations:^{
-				self.indicatorView.alpha = 1;
+				indicatorView.alpha = 1;
 			} completion:nil];
 		}else{
-			self.indicatorView.hidden = false;
+			indicatorView.hidden = false;
 		}
 	}
 
@@ -418,17 +413,17 @@ static const CGFloat kMaxScale = 1.0;
 		NSString *text = iconView.icon.displayName;
 		CGRect textRect = [text boundingRectWithSize:[objc_getClass("SBIconView") maxLabelSize] options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil];
 
-		self.indicatorView.bounds = CGRectMake(0, 0, textRect.size.width + 30, textRect.size.height + 30);
+		indicatorView.bounds = CGRectMake(0, 0, textRect.size.width + 30, textRect.size.height + 30);
 
 		if (!in_landscape) {
-			self.indicatorView.center = CGPointMake(MAX(MIN(self.focusPoint, self.bounds.size.width - self.indicatorView.bounds.size.width / 2), self.indicatorView.bounds.size.width / 2), (self.bounds.size.height / 2) - [[prefs getevasionDistance] doubleValue] - self.indicatorView.bounds.size.height - 20.0);
+			indicatorView.center = CGPointMake(MAX(MIN(focusPoint, self.bounds.size.width - indicatorView.bounds.size.width / 2), indicatorView.bounds.size.width / 2), (self.bounds.size.height / 2) - [[prefs getevasionDistance] doubleValue] - indicatorView.bounds.size.height - 20.0);
 		} else {
-			self.indicatorView.center = CGPointMake((self.bounds.size.width / 2) - [[prefs getevasionDistance] doubleValue] - self.indicatorView.bounds.size.width, MAX(MIN(self.focusPoint, self.bounds.size.height - self.indicatorView.bounds.size.height / 2), self.indicatorView.bounds.size.height / 2));
+			indicatorView.center = CGPointMake((self.bounds.size.width / 2) - [[prefs getevasionDistance] doubleValue] - indicatorView.bounds.size.width, MAX(MIN(focusPoint, self.bounds.size.height - indicatorView.bounds.size.height / 2), indicatorView.bounds.size.height / 2));
 		}
 
-		self.indicatorLabel.text = text;
-		self.indicatorLabel.bounds = textRect;
-		self.indicatorLabel.center = CGPointMake(self.indicatorView.bounds.size.width / 2, self.indicatorView.bounds.size.height / 2);
+		indicatorLabel.text = text;
+		indicatorLabel.bounds = textRect;
+		indicatorLabel.center = CGPointMake(indicatorView.bounds.size.width / 2, indicatorView.bounds.size.height / 2);
 
 	};
 
@@ -437,26 +432,26 @@ static const CGFloat kMaxScale = 1.0;
 	else
 		animations();
 
-	VERIFY_STOP(updateIndicatorForIconView_animated);
+
 }
 
 #pragma mark Touch Handling
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 
-	VERIFY_START(touchesBegan_withEvent);
+
 
 	if (![[prefs getenabled] boolValue]) {
-		@orig(touches, event);
+		%orig(touches, event);
 		return;
 	}
 
-	if (self.appLaunching)
+	if (appLaunching)
 		return;
 
-	self.trackingTouch = true;
-	self.focusPoint = in_landscape ? [[touches anyObject] locationInView:self].y : [[touches anyObject] locationInView:self].x;
-	self.activatingIcon = nil;
+	trackingTouch = true;
+	focusPoint = in_landscape ? [[touches anyObject] locationInView:self].y : [[touches anyObject] locationInView:self].x;
+	activatingIcon = nil;
 
 	[self layoutIconsIfNeeded:icon_animation_duration domino:false];
 
@@ -464,28 +459,28 @@ static const CGFloat kMaxScale = 1.0;
 	SBIconView *focusedIcon = nil;
 
 	@try {
-		focusedIcon = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:self.focusPoint]]];
+		focusedIcon = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:focusPoint]]];
 	}@catch (NSException *exception) { }
 
 	[self updateIndicatorForIconView:focusedIcon animated:false];
 
-	VERIFY_STOP(touchesBegan_withEvent);
+
 }
 
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 
 	if (![[prefs getenabled] boolValue]) {
-		@orig(touches, event);
+		%orig(touches, event);
 	}
 
-	if (self.appLaunching)
+	if (appLaunching)
 		return;
 
 	SBIconView *iconView = nil;
 
 	@try {
-		iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:self.focusPoint]]];
+		iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:focusPoint]]];
 	} @catch (NSException *e) { }
 
 	if ((in_landscape ? [[touches anyObject] locationInView:self].x : [[touches anyObject] locationInView:self].y) < 0 && (![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) && ((![[objc_getClass("SBIconController") sharedInstance] isEditing] && [[prefs getinitiateEditMode] boolValue]) || [[objc_getClass("SBIconController") sharedInstance] isEditing]) ) {
@@ -517,14 +512,14 @@ static const CGFloat kMaxScale = 1.0;
 		return;
 	}
 
-	self.focusPoint = in_landscape ? [[touches anyObject] locationInView:self].y : [[touches anyObject] locationInView:self].x;
+	focusPoint = in_landscape ? [[touches anyObject] locationInView:self].y : [[touches anyObject] locationInView:self].x;
 	[self layoutIconsIfNeeded:0 domino:false];
 
 	// Update indicator
 	SBIconView *focusedIcon = nil;
 
 	@try {
-		focusedIcon = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:self.focusPoint]]];
+		focusedIcon = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:focusPoint]]];
 	}@catch (NSException *exception) { }
 
 	[self updateIndicatorForIconView:focusedIcon animated:true];
@@ -532,14 +527,14 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 
-	VERIFY_START(touchesEnded_withEvent);
+
 
 	if (![[prefs getenabled] boolValue]) {
-		@orig(touches, event);
+		%orig(touches, event);
 		return;
 	}
 
-	if (self.appLaunching)
+	if (appLaunching)
 		return;
 
 	if ([[objc_getClass("SBIconController") sharedInstance] grabbedIcon]) {
@@ -559,7 +554,7 @@ static const CGFloat kMaxScale = 1.0;
 		return;
 	}
 
-	NSInteger index = [self columnAtX:self.focusPoint];
+	NSInteger index = [self columnAtX:focusPoint];
 
 	SBIconView *iconView = nil;
 
@@ -572,58 +567,59 @@ static const CGFloat kMaxScale = 1.0;
 
 	[self bringSubviewToFront:iconView];
 
-	self.activatingIcon = iconView;
+	activatingIcon = iconView;
 
 	[self layoutIconsIfNeeded:icon_animation_duration domino:false];
 
 	[[objc_getClass("SBIconController") sharedInstance] iconTapped:iconView];
 
-	VERIFY_STOP(touchesEnded_withEvent);
+
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 
-	VERIFY_START(touchesCancelled_withEvent);
+
 
 	if (![[prefs getenabled] boolValue]) {
-		@orig(touches, event);
+		%orig(touches, event);
 		return;
 	}
 
-	if (self.appLaunching)
+	if (appLaunching)
 		return;
 
-	self.trackingTouch = false;
+	trackingTouch = false;
 	[self layoutIconsIfNeeded:0 domino:false];
 
 	[self updateIndicatorForIconView:nil animated:true];
 
-	VERIFY_STOP(touchesCancelled_withEvent);
+
 }
 
 #pragma mark -
 
-
+%new
 - (void)collapseAnimated:(BOOL)animated {
 
-	VERIFY_START(collapseAnimated);
 
-	self.trackingTouch = false;
-	self.activatingIcon = nil;
+
+	trackingTouch = false;
+	activatingIcon = nil;
 	[self layoutIconsIfNeeded:animated ? icon_animation_duration : 0.0 domino:false];
 
-	VERIFY_STOP(collapseAnimated);
+
 }
 
-
+%new
 - (NSUInteger)columnAtX:(CGFloat)x {
 	return in_landscape ? [self rowAtPoint:CGPointMake(0, x)] : [self columnAtPoint:CGPointMake(x, 0)];
 }
 
+
 - (NSUInteger)columnAtPoint:(struct CGPoint)arg1 {
 
 	if (![[prefs getenabled] boolValue])
-		return @orig(arg1);
+		return %orig(arg1);
 
 	if (in_landscape) {
 		return 0;
@@ -642,7 +638,7 @@ static const CGFloat kMaxScale = 1.0;
 
 - (NSUInteger)rowAtPoint:(struct CGPoint)arg1 {
 	if (![[prefs getenabled] boolValue])
-		return @orig(arg1);
+		return %orig(arg1);
 
 	if (!in_landscape) {
 		return 0;
@@ -661,96 +657,96 @@ static const CGFloat kMaxScale = 1.0;
 
 - (void)removeIconAtIndex:(NSUInteger)arg1 {
 
-	VERIFY_START(removeIconAtIndex);
 
-	@orig(arg1);
+
+	%orig(arg1);
 
 	if (![[prefs getenabled] boolValue])
 		return;
 
 	[self collapseAnimated:true];
 
-	VERIFY_STOP(removeIconAtIndex);
+
 }
 
-@end
+%end
 
 #pragma mark Animators
 
-@hook SBIconFadeAnimator
+%hook SBIconFadeAnimator
 
 - (void)_cleanupAnimation {
 
-	VERIFY_START(_cleanupAnimation1);
 
-	@orig();
+
+	%orig();
 	if (![[prefs getenabled] boolValue])
 		return;
 	[[[objc_getClass("SBIconController") sharedInstance] dockListView] collapseAnimated:true];
 
-	VERIFY_STOP(_cleanupAnimation1);
+
 }
 
-@end
+%end
 
-@hook SBUIAnimationZoomUpAppFromHome
+%hook SBUIAnimationZoomUpAppFromHome
 
 - (void)prepareZoom {
-	VERIFY_START(prepareZoom);
+
 
 	if (![[prefs getenabled] boolValue]) {
-		@orig();
+		%orig();
 		return;
 	}
 
-	[[[objc_getClass("SBIconController") sharedInstance] dockListView] setAppLaunching:true];
-	@orig();
-	VERIFY_STOP(prepareZoom);
+	appLaunching = true;
+	%orig();
+
 }
 
 - (void)cleanupZoom {
-	VERIFY_START(cleanupZoom);
+
 
 	if (![[prefs getenabled] boolValue]) {
-		@orig();
+		%orig();
 		return;
 	}
 
-	[[[objc_getClass("SBIconController") sharedInstance] dockListView] setAppLaunching:false];
-	@orig();
-	VERIFY_STOP(cleanupZoom);
+	appLaunching = false;
+	%orig();
+
 }
 
-@end
+%end
 
-@hook SBScaleIconZoomAnimator
+%hook SBScaleIconZoomAnimator
 
 - (void)enumerateIconsAndIconViewsWithHandler:(void (^) (id animator, SBIconView *iconView, BOOL inDock))arg1 {
 
-	VERIFY_START(enumerateIconsAndIconViewsWithHandler);
+
 
 	if (![[prefs getenabled] boolValue]) {
-		@orig(arg1);
+		%orig(arg1);
 		return;
 	}
 
 	// Prevent this method from changing the origins and transforms of the dock icons
 
-	NSMapTable *mapHolder = _dockIconToViewMap;
-	_dockIconToViewMap = nil;
+	NSMapTable *mapHolder = MSHookIvar<NSMapTable*>(self, "_dockIconToViewMap");
+	MSHookIvar<NSMapTable*>(self, "_dockIconToViewMap") = nil;
 
-	@orig(arg1);
+	%orig(arg1);
 
-	_dockIconToViewMap = mapHolder;
+	MSHookIvar<NSMapTable*>(self, "_dockIconToViewMap") = mapHolder;
 
-	VERIFY_STOP(enumerateIconsAndIconViewsWithHandler);
+
 }
 
 - (void)_prepareAnimation {
-	VERIFY_START(_prepareAnimation);
+
 
 	if (![[prefs getenabled] boolValue]) {
-		@orig();
+		%orig();
 		return;
 	}
 
@@ -765,37 +761,38 @@ static const CGFloat kMaxScale = 1.0;
 	SBIconView *targetIconView = [dockListView.viewMap mappedIconViewForIcon:self.targetIcon];
 
 	if ([targetIconView isInDock]) {
-		dockListView.activatingIcon = targetIconView;
-		dockListView.trackingTouch = true;
+		activatingIcon = targetIconView;
+		trackingTouch = true;
 		[dockListView layoutIconsIfNeeded:0.0 domino:false];
 	}
 
-	@orig();
+	%orig();
 
-	VERIFY_STOP(_prepareAnimation);
+
 }
 
 - (void)_cleanupAnimation {
-	VERIFY_START(_cleanupAnimation);
 
-	@orig();
+
+	%orig();
 	if (![[prefs getenabled] boolValue])
 		return;
 	[self.dockListView collapseAnimated:true];
 
-	VERIFY_STOP(_cleanupAnimation);
+
 }
 
-@end
+%end
 
-@hook SBDockView
+%hook SBDockView
 
 - (void)layoutSubviews {
-	@orig();
+	%orig();
 	if (![[prefs getenabled] boolValue])
 		return;
 	if (![[prefs getuseNormalBackground] boolValue]) {
-		_highlightView.hidden = true;
+
+		MSHookIvar<UIView*>(self, "_highlightView").hidden = true;
 		[self layoutBackgroundView];
 	}
 
@@ -818,7 +815,10 @@ static const CGFloat kMaxScale = 1.0;
 	[bounceWindow setFrame:frame];
 }
 
+%new
 - (void)layoutBackgroundView {
+
+	SBDockIconListView *_iconListView = MSHookIvar<SBDockIconListView*>(self, "_iconListView");
 
 	UIView *firstIcon = [_iconListView.viewMap mappedIconViewForIcon:[_iconListView.model.icons firstObject]];
 	UIView *lastIcon = [_iconListView.viewMap mappedIconViewForIcon:[_iconListView.model.icons lastObject]];
@@ -847,23 +847,24 @@ static const CGFloat kMaxScale = 1.0;
 
 	}
 
-	_backgroundView.layer.cornerRadius = 5.0;
-	_backgroundView.frame = frame;
+	MSHookIvar<UIView*>(self, "_backgroundView").layer.cornerRadius = 5.0;
+	MSHookIvar<UIView*>(self, "_backgroundView").frame = frame;
 
 }
 
-@end
+%end
 
-@hook SBRootFolderView
+%hook SBRootFolderView
 
 - (id)initWithFolder:(id)arg1 orientation:(UIInterfaceOrientation)arg2 viewMap:(id)arg3 forSnapshot:(BOOL)arg4 {
-	self = @orig(arg1, arg2, arg3, arg4);
+	self = %orig(arg1, arg2, arg3, arg4);
 	if (self) {
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orientationChanged:) name:UIDeviceOrientationDidChangeNotification object:[UIDevice currentDevice]];
 	}
 	return self;
 }
 
+%new
 - (void)orientationChanged:(NSNotification*)arg1 {
 	for (UIView *view in [[[objc_getClass("SBIconController") sharedInstance] _rootFolderController] iconListViews]) {
 		view.alpha = 1;
@@ -876,9 +877,9 @@ static const CGFloat kMaxScale = 1.0;
 	}
 }
 
-- (void)iconScrollView:(UIScrollView*)arg1 willSetContentOffset:(inout struct CGPoint *)arg2 {
+- (void)iconScrollView:(UIScrollView*)arg1 willSetContentOffset:(struct CGPoint *)arg2 {
 
-	@orig(arg1, arg2);
+	%orig(arg1, arg2);
 
 	if (![[prefs getenabled] boolValue])
 		return;
@@ -897,21 +898,21 @@ static const CGFloat kMaxScale = 1.0;
 }
 
 
-@end
+%end
 
-@hook SBRootFolderController
+%hook SBRootFolderController
 
 - (BOOL)_shouldSlideDockOutDuringRotationFromOrientation:(UIInterfaceOrientation)arg1 toOrientation:(UIInterfaceOrientation)arg2 {
 
 	if (![[prefs getenabled] boolValue])
-		return @orig(arg1, arg2);
+		return %orig(arg1, arg2);
 
 	return true; // Hides animation glitch. TODO: Make a proper fix for the glitch
 }
 
-@end
+%end
 
-@hook SBIconModelPropertyListFileStore
+%hook SBIconModelPropertyListFileStore
 
 /*
 Use different icon state plist so that SpringBoard doesn't mess up the dock
@@ -923,18 +924,17 @@ when we are in safe mode
 - (BOOL)_save:(id)arg1 url:(id)arg2 error:(id *)arg3 {
 
 	if ([[prefs getenabled] boolValue])
-		if (@orig(arg1, [NSURL URLWithString:@harborPlistStore], arg3))
-			;
+		%orig(arg1, [NSURL URLWithString:@harborPlistStore], arg3);
 
-	return @orig(arg1, arg2, arg3);
+	return %orig(arg1, arg2, arg3);
 }
 
 - (id)_load:(NSURL*)path error:(id *)arg2 {
 	if ([[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/SpringBoard/IconState_harbor.plist"] && [[prefs getenabled] boolValue]) {
-		return @orig([NSURL URLWithString:@harborPlistStore], arg2);
+		return %orig([NSURL URLWithString:@harborPlistStore], arg2);
 	}
 
-	return @orig(path, arg2);
+	return %orig(path, arg2);
 }
 
-@end
+%end

@@ -1,20 +1,15 @@
 export ARCHS = armv7 arm64
 
-export TARGET_CXX = /Users/eswick/Development/llvm_build/Debug+Asserts/bin/clang
-
-TARGET=iphone:8.1
+TARGET=iphone:8.3
 
 include theos/makefiles/common.mk
 
 TWEAK_NAME = Harbor
 
-export VERSION=1.0.0
-Harbor_CFLAGS += -DVERSION=\"$(VERSION)\"
-
-Harbor_FILES += Tweak.m SBIconView.m CAKeyframeAnimation+dockBounce.m HBPreferences.m
+Harbor_FILES += Tweak.xm SBIconView.xm CAKeyframeAnimation+dockBounce.m HBPreferences.m
 Harbor_FILES += extensions/UIView+Origin.m
 
-Harbor_CFLAGS += -Iinclude -Iextensions -fobjc-logos -Wno-objc-missing-super-calls
+Harbor_CFLAGS += -Iinclude -Iextensions
 
 Harbor_FRAMEWORKS += CoreGraphics UIKit QuartzCore
 Harbor_PRIVATE_FRAMEWORKS += SpringBoardFoundation

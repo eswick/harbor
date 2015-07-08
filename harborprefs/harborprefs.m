@@ -11,7 +11,7 @@
 @property (retain) NSString *activationServer;
 - (void)beginDownload;
 @end
-
+extern "C" {
 NSArray* SpecifiersFromPlist (
         NSDictionary*     plist,      // r0
         PSSpecifier*      prevSpec,   // r1
@@ -23,6 +23,7 @@ NSArray* SpecifiersFromPlist (
         PSListController* callerList,          // sp[0x130]
         NSMutableArray**  pBundleControllers   // sp[0x134]
 );
+}
 
 #define RESPRING_ALERT 1
 
@@ -124,13 +125,13 @@ NSArray* SpecifiersFromPlist (
 
 @end
 
-@hook HPListController
+%hook HPListController
 
 
 - (void)setenabled:(NSNumber*)newValue forSpecifier:(PSSpecifier*)specifier {
 	[self showRespringPrompt];
 }
 
-@end
+%end
 
 // vim:ft=objc
