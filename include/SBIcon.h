@@ -80,3 +80,8 @@
 
 @end
 
+@interface SBIcon (iOS8_4)
+
+- (id)displayNameForLocation:(int)arg1;
+
+@end

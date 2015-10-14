@@ -410,7 +410,14 @@ static UILabel *indicatorLabel;
 
 	void (^animations) (void) = ^{
 
-		NSString *text = iconView.icon.displayName;
+		NSString *text;
+
+		if ([iconView.icon respondsToSelector:@selector(displayName)]) {
+			text = iconView.icon.displayName;
+		} else {
+			text = [iconView.icon displayNameForLocation:[self iconLocation]];
+		}
+
 		CGRect textRect = [text boundingRectWithSize:[objc_getClass("SBIconView") maxLabelSize] options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil];
 
 		indicatorView.bounds = CGRectMake(0, 0, textRect.size.width + 30, textRect.size.height + 30);

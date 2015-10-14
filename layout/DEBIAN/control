@@ -1,7 +1,7 @@
 Package: com.eswick.harbor
 Name: Harbor
 Depends: mobilesubstrate
-Version: 1.0.0
+Version: 1.0.1
 Architecture: iphoneos-arm
 Description: OS X-style dock redesigned for touch screens!
 Maintainer: Evan Swick
