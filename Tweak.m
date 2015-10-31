@@ -22,6 +22,8 @@
 
 #import "HBPreferences.h"
 
+#define DEGREES_TO_RADIANS(x) (M_PI * (x) / 180.0)
+
 #pragma mark Declarations
 
 #define UIApp ([UIApplication sharedApplication])
@@ -806,7 +808,25 @@ static UILabel *indicatorLabel;
 	// Layout iconBounceWindow
 	UIWindow *bounceWindow = [(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindow];
 	UIWindow *bounceWindowContainer = [(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindowContainer];
-	bounceWindowContainer.transform = CGAffineTransformMakeRotation([(SBUIController*)[objc_getClass("SBUIController") sharedInstance] _contentRotationForOrientation:[UIApp statusBarOrientation]]);
+
+	CGFloat rotation;
+
+	switch(cur_orientation) {
+		case UIInterfaceOrientationPortrait:
+			rotation = 0;
+			break;
+		case UIInterfaceOrientationPortraitUpsideDown:
+			rotation = DEGREES_TO_RADIANS(180);
+			break;
+		case UIInterfaceOrientationLandscapeLeft:
+			rotation = DEGREES_TO_RADIANS(270);
+			break;
+		case UIInterfaceOrientationLandscapeRight:
+			rotation = DEGREES_TO_RADIANS(90);
+			break;
+	}
+
+	bounceWindowContainer.transform = CGAffineTransformMakeRotation(rotation);
 	bounceWindowContainer.frame = [[UIScreen mainScreen] bounds];
 
 	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];

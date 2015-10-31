@@ -1,6 +1,6 @@
 export ARCHS = armv7 arm64
 
-TARGET=iphone:8.3
+TARGET=iphone:9.0
 
 include theos/makefiles/common.mk
 
