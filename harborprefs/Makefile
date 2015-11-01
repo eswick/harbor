@@ -6,7 +6,7 @@ BUNDLE_NAME = harborprefs
 export VERSION=1.0.0
 harborprefs_CFLAGS += -DVERSION=\"$(VERSION)\"
 
-harborprefs_FILES += harborprefs.xm ../HBPreferences.m ../Installer.xm
+harborprefs_FILES += harborprefs.xm ../HBPreferences.m
 harborprefs_INSTALL_PATH = /Library/PreferenceBundles
 harborprefs_FRAMEWORKS += UIKit
 harborprefs_PRIVATE_FRAMEWORKS += Preferences

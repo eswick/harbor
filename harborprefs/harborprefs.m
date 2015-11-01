@@ -1,16 +1,6 @@
 #import <Preferences/Preferences.h>
 #import "HBPreferences.h"
-#define DYLIB_INSTALL_PATH @"/var/mobile/Library/Preferences/com.eswick.harbor.license"
 
-@interface HBDownloadController : NSObject
-@property (assign) UIAlertView *alertView;
-@property (assign) NSURLConnection *connection;
-@property (assign) NSMutableData *receivedData;
-@property (assign) double progress;
-@property (assign) size_t downloadSize;
-@property (retain) NSString *activationServer;
-- (void)beginDownload;
-@end
 extern "C" {
 NSArray* SpecifiersFromPlist (
         NSDictionary*     plist,      // r0
@@ -42,14 +32,6 @@ NSArray* SpecifiersFromPlist (
 }
 
 #include "Preferences.def"
-
-/*- (void)viewDidAppear:(_Bool)arg1{
-  [super viewDidAppear:arg1];
-  if(![[NSFileManager defaultManager] fileExistsAtPath:DYLIB_INSTALL_PATH]){
-    HBDownloadController *controller = [[HBDownloadController alloc] init];
-    [controller beginDownload];
-  }
-}*/
 
 - (id)specifiers {
 

@@ -23,4 +23,3 @@
 - (void)iconTouchBegan:(SBIconView *)arg1;
 - (void)iconHandleLongPress:(SBIconView *)arg1;
 @end
-

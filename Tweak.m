@@ -494,7 +494,7 @@ static UILabel *indicatorLabel;
 		// set grabbed and begin forwarding touches to icon
 		[[objc_getClass("SBIconController") sharedInstance] setGrabbedIcon:iconView.icon];
 		[iconView touchesBegan:touches withEvent:nil];
-		[iconView longPressTimerFired];
+		[[iconView delegate] iconHandleLongPress:iconView];
 
 		[[objc_getClass("SBIconController") sharedInstance] setIsEditing:true];
 
