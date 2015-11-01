@@ -48,18 +48,6 @@
 
 @interface SBDockIconListView ()
 
-/*@property (nonatomic, assign) CGFloat focusPoint;
-@property (nonatomic, assign) BOOL trackingTouch;
-@property (nonatomic, assign) BOOL appLaunching;
-@property (nonatomic, assign) SBIconView *activatingIcon;
-
-@property (nonatomic, assign) CGFloat maxTranslationX;
-@property (nonatomic, assign) CGFloat xTranslationDamper;
-
-@property (nonatomic, retain) UIView *indicatorView;
-@property (nonatomic, assign) UILabel *indicatorLabel;
-@property (nonatomic, assign) SBIconView *focusedIconView;*/
-
 - (CGFloat)horizontalIconBounds;
 - (CGFloat)iconPadding;
 - (CGFloat)collapsedIconPadding;
