@@ -336,8 +336,6 @@
 
 	if ([self isInDock]) {
 		MSHookIvar<UIView*>(self, "_labelView").hidden = true;
-	}else{
-		MSHookIvar<UIView*>(self, "_labelView").hidden = false;
 	}
 }
 
