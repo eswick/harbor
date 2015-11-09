@@ -326,17 +326,18 @@
 - (void)layoutSubviews {
 	if (![[prefs getenabled] boolValue]) {
 		%orig();
-		MSHookIvar<UIView*>(self, "_labelView").hidden = false;
+		if ([self isInDock]) {
+			MSHookIvar<UIView*>(self, "_labelView").hidden = true;
+		}
+		else {
+			MSHookIvar<UIView*>(self, "_labelView").hidden = false;
+		}
 		self.indicatorView.hidden = true;
 		return;
 	}
 
 	%orig();
 	[self updateIndicatorVisibility];
-
-	if ([self isInDock]) {
-		MSHookIvar<UIView*>(self, "_labelView").hidden = true;
-	}
 }
 
 #pragma mark Touch Handling
