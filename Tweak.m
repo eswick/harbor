@@ -479,7 +479,15 @@ static UILabel *indicatorLabel;
 	@try {
 		iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:focusPoint]]];
 	} @catch (NSException *e) { }
+	
+	if ([[touches anyObject] force] >= 2) {
 
+		[self collapseAnimated:YES];
+		SBIconController *controller = [NSClassFromString(@"SBIconController") sharedInstance];
+		[controller _revealMenuForIconView:iconView presentImmediately:YES];
+		%orig(touches, event);
+	}
+	
 	if ((in_landscape ? [[touches anyObject] locationInView:self].x : [[touches anyObject] locationInView:self].y) < 0 && (![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) && ((![[objc_getClass("SBIconController") sharedInstance] isEditing] && [[prefs getinitiateEditMode] boolValue]) || [[objc_getClass("SBIconController") sharedInstance] isEditing]) ) {
 		// get origin, remove transform, restore origin
 		CGPoint origin = iconView.origin;
