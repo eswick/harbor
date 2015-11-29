@@ -480,7 +480,7 @@ static UILabel *indicatorLabel;
 		iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:focusPoint]]];
 	} @catch (NSException *e) { }
 	
-	if ([[touches anyObject] force] >= 2) {
+	if ([[touches anyObject] respondsToSelector:@selector(force)] && [[touches anyObject] force] >= 2.5) {
 
 		[self collapseAnimated:YES];
 		SBIconController *controller = [NSClassFromString(@"SBIconController") sharedInstance];
