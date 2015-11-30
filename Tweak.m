@@ -479,7 +479,14 @@ static UILabel *indicatorLabel;
 	@try {
 		iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:focusPoint]]];
 	} @catch (NSException *e) { }
+	
+	if ([[touches anyObject] respondsToSelector:@selector(force)] && [[touches anyObject] force] >= 2.5) {
 
+		SBIconController *controller = [NSClassFromString(@"SBIconController") sharedInstance];
+		[controller _revealMenuForIconView:iconView presentImmediately:YES];
+		%orig(touches, event);
+	}
+	
 	if ((in_landscape ? [[touches anyObject] locationInView:self].x : [[touches anyObject] locationInView:self].y) < 0 && (![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) && ((![[objc_getClass("SBIconController") sharedInstance] isEditing] && [[prefs getinitiateEditMode] boolValue]) || [[objc_getClass("SBIconController") sharedInstance] isEditing]) ) {
 		// get origin, remove transform, restore origin
 		CGPoint origin = iconView.origin;
@@ -950,6 +957,18 @@ when we are in safe mode
 	}
 
 	return %orig(path, arg2);
+}
+
+%end
+
+%hook SBIconController
+
+- (void)applicationShortcutMenuDidDismiss:(id)arg1 {
+
+	%orig(arg1);
+
+	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];
+	[dockListView collapseAnimated:YES];
 }
 
 %end

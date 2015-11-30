@@ -202,6 +202,7 @@
 - (void)updateCurrentIconListIndexAndVisibility;
 - (BOOL)isFolderScrolling;
 - (BOOL)isScrolling;
+- (void)_revealMenuForIconView:(id)arg1 presentImmediately:(BOOL)arg2;
 - (void)showCarrierDebuggingAlertIfNeeded;
 - (void)showInfoAlertIfNeeded:(BOOL)arg1;
 - (void)showSpotlightAlertIfNecessary;
