@@ -482,7 +482,6 @@ static UILabel *indicatorLabel;
 	
 	if ([[touches anyObject] respondsToSelector:@selector(force)] && [[touches anyObject] force] >= 2.5) {
 
-		[self collapseAnimated:YES];
 		SBIconController *controller = [NSClassFromString(@"SBIconController") sharedInstance];
 		[controller _revealMenuForIconView:iconView presentImmediately:YES];
 		%orig(touches, event);
@@ -958,6 +957,18 @@ when we are in safe mode
 	}
 
 	return %orig(path, arg2);
+}
+
+%end
+
+%hook SBIconController
+
+- (void)applicationShortcutMenuDidDismiss:(id)arg1 {
+
+	%orig(arg1);
+
+	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];
+	[dockListView collapseAnimated:YES];
 }
 
 %end
