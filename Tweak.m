@@ -479,14 +479,21 @@ static UILabel *indicatorLabel;
 	@try {
 		iconView = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:focusPoint]]];
 	} @catch (NSException *e) { }
-	
+
+	//cancel wave without opening an app by tapping with another finger
+	if ([[event allTouches] count] >= 2) {
+		[self collapseAnimated:YES];
+		trackingTouch = NO;
+		return;
+	}
+
 	if ([[touches anyObject] respondsToSelector:@selector(force)] && [[touches anyObject] force] >= 2.5) {
 
 		SBIconController *controller = [NSClassFromString(@"SBIconController") sharedInstance];
 		[controller _revealMenuForIconView:iconView presentImmediately:YES];
 		%orig(touches, event);
 	}
-	
+
 	if ((in_landscape ? [[touches anyObject] locationInView:self].x : [[touches anyObject] locationInView:self].y) < 0 && (![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) && ((![[objc_getClass("SBIconController") sharedInstance] isEditing] && [[prefs getinitiateEditMode] boolValue]) || [[objc_getClass("SBIconController") sharedInstance] isEditing]) ) {
 		// get origin, remove transform, restore origin
 		CGPoint origin = iconView.origin;
@@ -558,6 +565,9 @@ static UILabel *indicatorLabel;
 		return;
 	}
 
+	if (!trackingTouch)
+		return;
+	
 	NSInteger index = [self columnAtX:focusPoint];
 
 	SBIconView *iconView = nil;
