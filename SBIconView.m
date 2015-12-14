@@ -323,22 +323,26 @@
 
 }
 
-- (void)layoutSubviews {
-	if (![[prefs getenabled] boolValue]) {
-		%orig();
-		MSHookIvar<UIView*>(self, "_labelView").hidden = false;
+- (void) _updateLabel {
+	if ([[prefs getenabled] boolValue]) {
+		if ([self isInDock]) {
+			MSHookIvar<UIView*>(self, "_labelView").hidden = true;
+		}
+		else {
+			MSHookIvar<UIView*>(self, "_labelView").hidden = false;
+		}
 		self.indicatorView.hidden = true;
+		%orig();
 		return;
 	}
+	else{
+		%orig();
+	}
+}
 
+- (void)layoutSubviews {
 	%orig();
 	[self updateIndicatorVisibility];
-
-	if ([self isInDock]) {
-		MSHookIvar<UIView*>(self, "_labelView").hidden = true;
-	}else{
-		MSHookIvar<UIView*>(self, "_labelView").hidden = false;
-	}
 }
 
 #pragma mark Touch Handling
