@@ -567,7 +567,7 @@ static UILabel *indicatorLabel;
 
 	if (!trackingTouch)
 		return;
-	
+
 	NSInteger index = [self columnAtX:focusPoint];
 
 	SBIconView *iconView = nil;
@@ -703,9 +703,9 @@ static UILabel *indicatorLabel;
 
 %end
 
-%hook SBUIAnimationZoomUpAppFromHome
+%hook SBIconAnimator
 
-- (void)prepareZoom {
+- (void)prepare {
 
 
 	if (![[prefs getenabled] boolValue]) {
@@ -718,7 +718,7 @@ static UILabel *indicatorLabel;
 
 }
 
-- (void)cleanupZoom {
+- (void)cleanup {
 
 
 	if (![[prefs getenabled] boolValue]) {
