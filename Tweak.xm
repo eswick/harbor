@@ -490,7 +490,24 @@ static UILabel *indicatorLabel;
 	if ([[touches anyObject] respondsToSelector:@selector(force)] && [[touches anyObject] force] >= 2.5) {
 
 		SBIconController *controller = [NSClassFromString(@"SBIconController") sharedInstance];
-		[controller _revealMenuForIconView:iconView presentImmediately:YES];
+
+		if ([controller respondsToSelector:@selector(_revealMenuForIconView:presentImmediately:)]) {
+			
+			[controller _revealMenuForIconView:iconView presentImmediately:YES];
+		}
+
+		else if ([controller respondsToSelector:@selector(_revealMenuForIconView:)]) {
+
+			//queue the shortcut object
+			[controller _revealMenuForIconView:iconView];
+
+			//present it if its successfully been created
+			if ([controller valueForKey:@"_presentedShortcutMenu"]) {
+
+				[[controller valueForKey:@"_presentedShortcutMenu"] performSelector:@selector(presentAnimated:) withObject:@(YES)];
+			}
+		}
+
 		%orig(touches, event);
 	}
 
