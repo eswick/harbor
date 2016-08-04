@@ -11,7 +11,7 @@ harborprefs_INSTALL_PATH = /Library/PreferenceBundles
 harborprefs_FRAMEWORKS += UIKit
 harborprefs_PRIVATE_FRAMEWORKS += Preferences
 harborprefs_CFLAGS += -I.. -Wno-deprecated-declarations
-harborprefs_LIBRARIES += substrate MobileGestalt
+harborprefs_LIBRARIES += substrate
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 
