@@ -9,9 +9,14 @@ harborprefs_CFLAGS += -DVERSION=\"$(VERSION)\"
 harborprefs_FILES += harborprefs.xm ../HBPreferences.m
 harborprefs_INSTALL_PATH = /Library/PreferenceBundles
 harborprefs_FRAMEWORKS += UIKit
-harborprefs_PRIVATE_FRAMEWORKS += Preferences
 harborprefs_CFLAGS += -I.. -Wno-deprecated-declarations
 harborprefs_LIBRARIES += substrate MobileGestalt
+
+ifndef SIMULATOR
+harborprefs_PRIVATE_FRAMEWORKS += Preferences
+else
+harborprefs_LDFLAGS += -undefined dynamic_lookup
+endif
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

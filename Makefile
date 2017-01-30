@@ -1,6 +1,10 @@
+ifdef SIMULATOR
+export TARGET = simulator:clang
+export ARCHS = x86_64 i386
+else
+export TARGET = iphone:latest
 export ARCHS = armv7 arm64
-
-TARGET=iphone:9.1
+endif
 
 include theos/makefiles/common.mk
 
@@ -12,8 +16,6 @@ Harbor_FILES += extensions/UIView+Origin.m
 Harbor_CFLAGS += -Iinclude -Iextensions
 
 Harbor_FRAMEWORKS += CoreGraphics UIKit QuartzCore
-Harbor_PRIVATE_FRAMEWORKS += SpringBoardFoundation
-
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
