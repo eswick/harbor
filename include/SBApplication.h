@@ -16,7 +16,7 @@ typedef enum {
   SBActivationStateDeactivated = 7
 } SBActivationState;
 
-@class BKSApplicationDataStore, BKSCFBundle, BKSMachSendRight, BKSProcessAssertion, NSArray, NSDate, NSDictionary, NSHashTable, NSMapTable, NSMutableArray, NSMutableDictionary, NSMutableSet, NSSet, NSString, NSTimer, PCPersistentTimer, SBActivationContext, SBWindowContextManager, UILocalNotification, UIRemoteApplication;
+@class BKSApplicationDataStore, BKSCFBundle, BKSMachSendRight, BKSProcessAssertion, NSArray, NSDate, NSDictionary, NSHashTable, NSMapTable, NSMutableArray, NSMutableDictionary, NSMutableSet, NSSet, NSString, NSTimer, PCPersistentTimer, SBActivationContext, SBWindowContextManager, UIRemoteApplication;
 
 @interface SBApplication : NSObject
 {
@@ -110,7 +110,6 @@ typedef enum {
     NSDate *_nextApplicationWakeDate;
     PCPersistentTimer *_applicationWakeTimer;
     PCPersistentTimer *_localNotificationTimer;
-    UILocalNotification *_pendingLocalNotification;
     BKSProcessAssertion *_transientProcessAssertion;
     NSTimer *_transientSuspendTimer;
     int _transientAssertionType;
