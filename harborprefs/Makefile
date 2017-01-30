@@ -8,7 +8,7 @@ harborprefs_FRAMEWORKS += UIKit
 harborprefs_CFLAGS += -I.. -Wno-deprecated-declarations
 harborprefs_LIBRARIES += substrate MobileGestalt
 
-ifndef SIMULATOR
+ifdef SIMULATOR
 harborprefs_PRIVATE_FRAMEWORKS += Preferences
 else
 harborprefs_LDFLAGS += -undefined dynamic_lookup
