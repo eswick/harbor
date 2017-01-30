@@ -1,5 +1,6 @@
 #import <objc/objc.h>
 #import <objc/message.h>
+#import <substrate.h>
 #import "SBIconView.h"
 #import "SBIconController.h"
 #import "SBApplication.h"
