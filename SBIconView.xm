@@ -30,7 +30,7 @@
 
 @end
 
-@interface SBIconView ()
+@interface SBIconView () <CAAnimationDelegate>
 
 @property (nonatomic, retain) UIView *indicatorView;
 @property (nonatomic, retain) NSTimer *bounceTimer;
