@@ -1,7 +1,7 @@
 #import "HBPreferences.h"
 #import <notify.h>
 
-#define PREFS_PATH @"/var/mobile/Library/Preferences/com.eswick.harbor.plist"
+#define PREFS_PATH [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/com.eswick.harbor.plist"]
 
 
 /* Dictionary tools */
