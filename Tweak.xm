@@ -923,7 +923,9 @@ static UILabel *indicatorLabel;
 	if (![[prefs getuseNormalBackground] boolValue]) {
 		CGPoint contentOffset = [self.scrollView contentOffset];
 
-		[self iconScrollView:self.scrollView willSetContentOffset:&contentOffset];
+		if ([self respondsToSelector:@selector(iconScrollView:willSetContentOffset:)]) {
+			[self iconScrollView:self.scrollView willSetContentOffset:&contentOffset];
+		}
 	}
 }
 
