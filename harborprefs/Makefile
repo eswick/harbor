@@ -6,7 +6,7 @@ harborprefs_FILES += harborprefs.xm ../HBPreferences.m
 harborprefs_INSTALL_PATH = /Library/PreferenceBundles
 harborprefs_FRAMEWORKS += UIKit
 harborprefs_CFLAGS += -I.. -Wno-deprecated-declarations
-harborprefs_LIBRARIES += substrate MobileGestalt
+harborprefs_LIBRARIES += substrate
 
 ifdef SIMULATOR
 harborprefs_PRIVATE_FRAMEWORKS += Preferences

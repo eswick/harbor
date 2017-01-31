@@ -23,6 +23,6 @@
 	<key>MinimumOSVersion</key>
 	<string>3.0</string>
 	<key>NSPrincipalClass</key>
-	<string>harborprefsListController</string>
+	<string>HPListController</string>
 </dict>
 </plist>
