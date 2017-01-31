@@ -1,4 +1,5 @@
-#import <Preferences/Preferences.h>
+#import <Preferences/PSSpecifier.h>
+#import <Preferences/PSListController.h>
 #import "HBPreferences.h"
 
 extern "C" {
@@ -67,7 +68,7 @@ NSArray* SpecifiersFromPlist (
 
 		NSString *specifierID = nil;
 		NSString *title = nil;
-		_specifiers = [SpecifiersFromPlist(plist, _specifier, self, @"harborprefs", [self bundle], &title, &specifierID, self, &_bundleControllers) retain];
+		_specifiers = [SpecifiersFromPlist(plist, [self specifier], self, @"harborprefs", [self bundle], &title, &specifierID, self, nil) retain];
 
 		if (title)
 			[self setTitle:title];
