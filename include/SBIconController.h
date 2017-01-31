@@ -15,7 +15,7 @@
 #import "SBIconViewMapDelegate.h"
 #import "SBSearchGestureObserver.h"*/
 
-@class BBObserver, NSIndexPath, NSMutableArray, NSMutableSet, NSSet, NSTimer, SBFolder, SBIcon, SBIconColorSettings, SBIconContentView, SBIconModel, SBLeafIcon, SBRootFolderController, UITouch, _UILegibilitySettings;
+@class BBObserver, NSIndexPath, NSMutableArray, NSMutableSet, NSSet, NSTimer, SBFolder, SBIcon, SBIconColorSettings, SBIconContentView, SBIconModel, SBLeafIcon, SBRootFolderController, UITouch, _UILegibilitySettings, _UIFeedbackImpactBehavior;
 
 @interface SBIconController : NSObject /*<BBObserverDelegate, MCProfileConnectionObserver, SBApplicationRestrictionObserver, SBFolderControllerDelegate, SBSearchGestureObserver, SBIconViewDelegate, SBIconModelDelegate, SBIconViewMapDelegate, SBIconModelApplicationDataSource>*/
 {
@@ -99,6 +99,7 @@
 - (void)iconTouchBegan:(id)arg1;
 - (void)icon:(id)arg1 touchEnded:(BOOL)arg2;
 - (void)iconHandleLongPress:(id)arg1;
+- (void)iconHandleLongPress:(SBIconView *)arg1 withFeedbackBehavior:(_UIFeedbackImpactBehavior *)arg2;
 - (int)viewMap:(id)arg1 locationForIcon:(id)arg2;
 - (NSUInteger)viewMap:(id)arg1 numberOfViewsToPrepareOfClass:(Class)arg2;
 - (id)viewMapShouldPrepareViewsOfClasses:(id)arg1;

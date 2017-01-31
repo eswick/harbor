@@ -5,7 +5,7 @@
 //
 
 
-@class SBFolder, SBIconView, UITouch;
+@class SBFolder, SBIconView, UITouch, _UIFeedbackImpactBehavior;
 
 @protocol SBIconViewDelegate <NSObject>
 
@@ -22,4 +22,5 @@
 - (void)icon:(SBIconView *)arg1 touchMoved:(UITouch *)arg2;
 - (void)iconTouchBegan:(SBIconView *)arg1;
 - (void)iconHandleLongPress:(SBIconView *)arg1;
+- (void)iconHandleLongPress:(SBIconView *)arg1 withFeedbackBehavior:(_UIFeedbackImpactBehavior *)arg2; // iOS 10
 @end

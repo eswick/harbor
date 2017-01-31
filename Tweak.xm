@@ -493,7 +493,7 @@ static UILabel *indicatorLabel;
 		SBIconController *controller = [NSClassFromString(@"SBIconController") sharedInstance];
 
 		if ([controller respondsToSelector:@selector(_revealMenuForIconView:presentImmediately:)]) {
-			
+
 			[controller _revealMenuForIconView:iconView presentImmediately:YES];
 		}
 
@@ -526,7 +526,7 @@ static UILabel *indicatorLabel;
 		// set grabbed and begin forwarding touches to icon
 		[[objc_getClass("SBIconController") sharedInstance] setGrabbedIcon:iconView.icon];
 		[iconView touchesBegan:touches withEvent:nil];
-		[[iconView delegate] iconHandleLongPress:iconView];
+		[[iconView delegate] iconHandleLongPress:iconView withFeedbackBehavior:nil];
 
 		[[objc_getClass("SBIconController") sharedInstance] setIsEditing:true];
 
