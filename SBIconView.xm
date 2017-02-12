@@ -135,7 +135,7 @@
 		self.indicatorView.layer.cornerRadius = self.indicatorView.bounds.size.width / 2;
 		self.indicatorView.hidden = true;
 
-		CGSize defaultSize = [objc_getClass("SBIconView") defaultIconImageSize];
+		CGSize defaultSize = [%c(SBIconView) defaultIconImageSize];
 		self.indicatorView.center = CGPointMake(defaultSize.width / 2, defaultSize.height + self.indicatorView.bounds.size.height);
 
 		[self addSubview:self.indicatorView];
@@ -146,17 +146,17 @@
 
 %new
 - (void)bounce {
-	CAKeyframeAnimation *animation = [CAKeyframeAnimation dockBounceAnimationWithIconHeight:[objc_getClass("SBIconView") defaultVisibleIconImageSize].height];
+	CAKeyframeAnimation *animation = [CAKeyframeAnimation dockBounceAnimationWithIconHeight:[%c(SBIconView) defaultVisibleIconImageSize].height];
 	animation.delegate = self;
 
 	if ([UIApp isLocked]) {
 
 		if ([[prefs getshowBounceOnLockScreen] boolValue])
-			[[(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindow] addSubview:self];
+			[[(SBUIController*)[%c(SBUIController) sharedInstance] iconBounceWindow] addSubview:self];
 
-	} else if ([UIApp _accessibilityFrontMostApplication] && ![(SBUIController*)[objc_getClass("SBUIController") sharedInstance] isAppSwitcherShowing] && [[prefs getbounceAboveApps] boolValue]) {
+	} else if ([UIApp _accessibilityFrontMostApplication] && ![(SBUIController*)[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && [[prefs getbounceAboveApps] boolValue]) {
 
-		[[(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindow] addSubview:self];
+		[[(SBUIController*)[%c(SBUIController) sharedInstance] iconBounceWindow] addSubview:self];
 
 	}
 
@@ -166,7 +166,7 @@
 %new
 - (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
 	if ([self isInDock]) {
-		[[[objc_getClass("SBIconController") sharedInstance] dockListView] addSubview:self];
+		[[[%c(SBIconController) sharedInstance] dockListView] addSubview:self];
 	}
 }
 
@@ -223,10 +223,10 @@
 	if (![[prefs getenabled] boolValue])
 		return;
 
-	if ([self.icon isKindOfClass:objc_getClass("SBApplicationIcon")]) {
+	if ([self.icon isKindOfClass:%c(SBApplicationIcon)]) {
 		SBApplicationIcon *appIcon = (SBApplicationIcon*)self.icon;
 
-		SBApplication *app = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:appIcon.applicationBundleID];
+		SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:appIcon.applicationBundleID];
 
 		if ([UIApp _accessibilityFrontMostApplication] == app)
 			app.lastLaunchDate = [NSDate date];
@@ -267,7 +267,7 @@
 
 	BOOL applicationRunning = false;
 
-	if ([self.icon isKindOfClass:objc_getClass("SBApplicationIcon")]) {
+	if ([self.icon isKindOfClass:%c(SBApplicationIcon)]) {
 		SBApplicationIcon *icon = (SBApplicationIcon*)self.icon;
 		if ([icon.application activationState] >= SBActivationStateActivated) {
 			applicationRunning = true;
@@ -297,7 +297,7 @@
 
 #pragma mark Touch Handling
 
-#define super(...) ({ struct objc_super superInfo = { self, objc_getClass("UIView") }; ((void(*)(struct objc_super*,SEL,id,id))objc_msgSendSuper)(&superInfo, _cmd, __VA_ARGS__); })
+#define super(...) ({ struct objc_super superInfo = { self, %c(UIView) }; ((void(*)(struct objc_super*,SEL,id,id))objc_msgSendSuper)(&superInfo, _cmd, __VA_ARGS__); })
 
 - (void)touchesEnded:(id)arg1 withEvent:(id)arg2{
 	if (![[prefs getenabled] boolValue]) {
@@ -353,10 +353,10 @@
 
 - (void)publishBulletin:(BBBulletin*)arg1 destinations:(unsigned int)arg2 alwaysToLockScreen:(BOOL)arg3 {
 
-	SBApplicationIcon *icon = [(SBIconModel*)[[objc_getClass("SBIconController") sharedInstance] model] applicationIconForBundleIdentifier:[arg1 sectionID]];
-	SBIconView *iconView = [[[[objc_getClass("SBIconController") sharedInstance] dockListView] viewMap] mappedIconViewForIcon:icon];
+	SBApplicationIcon *icon = [(SBIconModel*)[[%c(SBIconController) sharedInstance] model] applicationIconForBundleIdentifier:[arg1 sectionID]];
+	SBIconView *iconView = [[[[%c(SBIconController) sharedInstance] dockListView] viewMap] mappedIconViewForIcon:icon];
 
-	SBApplication *app = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:[arg1 sectionID]];
+	SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:[arg1 sectionID]];
 
 	app.lastNotificationDate = [NSDate date];
 
@@ -384,8 +384,8 @@
 
 	%orig(arg1);
 
-	SBIcon *icon = [(SBIconModel*)[[objc_getClass("SBIconController") sharedInstance] model] applicationIconForBundleIdentifier:self.bundleIdentifier];
-	SBIconView *iconView = [[[[objc_getClass("SBIconController") sharedInstance] dockListView] viewMap] mappedIconViewForIcon:icon];
+	SBIcon *icon = [(SBIconModel*)[[%c(SBIconController) sharedInstance] model] applicationIconForBundleIdentifier:self.bundleIdentifier];
+	SBIconView *iconView = [[[[%c(SBIconController) sharedInstance] dockListView] viewMap] mappedIconViewForIcon:icon];
 
 	[iconView updateIndicatorVisibility];
 

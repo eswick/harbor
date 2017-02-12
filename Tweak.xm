@@ -116,7 +116,7 @@ static UILabel *indicatorLabel;
 		indicatorView.layer.cornerRadius = 5;
 
 		// Add background view
-		SBWallpaperEffectView *indicatorBackgroundView = [[objc_getClass("SBWallpaperEffectView") alloc] initWithWallpaperVariant:1];
+		SBWallpaperEffectView *indicatorBackgroundView = [[%c(SBWallpaperEffectView) alloc] initWithWallpaperVariant:1];
 		indicatorBackgroundView.style = 11;
 		indicatorBackgroundView.translatesAutoresizingMaskIntoConstraints = false;
 
@@ -153,7 +153,7 @@ static UILabel *indicatorLabel;
 
 %new
 - (CGFloat)collapsedIconScale {
-	CGFloat normalIconSize = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
+	CGFloat normalIconSize = [%c(SBIconView) defaultVisibleIconImageSize].width;
 
 	CGFloat newIconSize = [self horizontalIconBounds] / self.model.numberOfIcons;
 
@@ -166,12 +166,12 @@ static UILabel *indicatorLabel;
 
 %new
 - (CGFloat)collapsedIconWidth {
-	return [self collapsedIconScale] * ([objc_getClass("SBIconView") defaultVisibleIconImageSize].width + [self iconPadding]);
+	return [self collapsedIconScale] * ([%c(SBIconView) defaultVisibleIconImageSize].width + [self iconPadding]);
 }
 
 %new
 - (CGFloat)iconPadding {
-	return [objc_getClass("SBIconView") defaultVisibleIconImageSize].width * [[prefs geticonPaddingMultipler] floatValue];
+	return [%c(SBIconView) defaultVisibleIconImageSize].width * [[prefs geticonPaddingMultipler] floatValue];
 }
 
 %new
@@ -225,7 +225,7 @@ static UILabel *indicatorLabel;
 		return;
 	}
 
-	CGFloat defaultWidth = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
+	CGFloat defaultWidth = [%c(SBIconView) defaultVisibleIconImageSize].width;
 
 	xTranslationDamper = acos(([[prefs geteffectiveRange] doubleValue] * [self collapsedIconScale]) / ([[prefs geteffectiveRange] doubleValue] / 2) - 1) * ([[prefs geteffectiveRange] doubleValue] / M_PI);
 	maxTranslationX = 0;
@@ -266,7 +266,7 @@ static UILabel *indicatorLabel;
 
 		[self updateIconTransforms];
 
-		if ([self.superview isKindOfClass:objc_getClass("SBDockView")]) {
+		if ([self.superview isKindOfClass:%c(SBDockView)]) {
 			if (![[prefs getuseNormalBackground] boolValue]) {
 				[(SBDockView*)self.superview layoutBackgroundView];
 			}
@@ -280,7 +280,7 @@ static UILabel *indicatorLabel;
 
 %new
 - (CGPoint)collapsedCenterForIcon:(SBIcon*)icon {
-	CGFloat defaultWidth = [objc_getClass("SBIconView") defaultVisibleIconImageSize].width;
+	CGFloat defaultWidth = [%c(SBIconView) defaultVisibleIconImageSize].width;
 
 	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * (defaultWidth + [self iconPadding])) / 2, 0);
 
@@ -392,7 +392,7 @@ static UILabel *indicatorLabel;
 			text = [iconView.icon displayNameForLocation:[self iconLocation]];
 		}
 
-		CGRect textRect = [text boundingRectWithSize:[objc_getClass("SBIconView") maxLabelSize] options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil];
+		CGRect textRect = [text boundingRectWithSize:[%c(SBIconView) maxLabelSize] options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil];
 
 		indicatorView.bounds = CGRectMake(0, 0, textRect.size.width + 30, textRect.size.height + 30);
 
@@ -484,7 +484,7 @@ static UILabel *indicatorLabel;
 		%orig(touches, event);
 	}
 
-	if ((in_landscape ? [[touches anyObject] locationInView:self].x : [[touches anyObject] locationInView:self].y) < 0 && (![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) && ((![[objc_getClass("SBIconController") sharedInstance] isEditing] && [[prefs getinitiateEditMode] boolValue]) || [[objc_getClass("SBIconController") sharedInstance] isEditing])) {
+	if ((in_landscape ? [[touches anyObject] locationInView:self].x : [[touches anyObject] locationInView:self].y) < 0 && (![[%c(SBIconController) sharedInstance] grabbedIcon] && iconView) && ((![[%c(SBIconController) sharedInstance] isEditing] && [[prefs getinitiateEditMode] boolValue]) || [[%c(SBIconController) sharedInstance] isEditing])) {
 		// get origin, remove transform, restore origin
 		CGPoint origin = iconView.origin;
 		iconView.transform = CGAffineTransformIdentity;
@@ -492,23 +492,23 @@ static UILabel *indicatorLabel;
 
 		// fix frame (somewhere along the way, the size gets set to zero. not exactly sure where)
 		CGRect frame = iconView.frame;
-		frame.size = [objc_getClass("SBIconView") defaultIconSize];
+		frame.size = [%c(SBIconView) defaultIconSize];
 		iconView.frame = frame;
 
 		// set grabbed and begin forwarding touches to icon
-		[[objc_getClass("SBIconController") sharedInstance] setGrabbedIcon:iconView.icon];
+		[[%c(SBIconController) sharedInstance] setGrabbedIcon:iconView.icon];
 		[iconView touchesBegan:touches withEvent:nil];
 		[[iconView delegate] iconHandleLongPress:iconView withFeedbackBehavior:nil];
 
-		[[objc_getClass("SBIconController") sharedInstance] setIsEditing:true];
+		[[%c(SBIconController) sharedInstance] setIsEditing:true];
 
 		[self updateIndicatorForIconView:nil animated:true];
 
 		return;
 	}
 
-	if ([[objc_getClass("SBIconController") sharedInstance] grabbedIcon]) {
-		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:[[objc_getClass("SBIconController") sharedInstance] grabbedIcon]];
+	if ([[%c(SBIconController) sharedInstance] grabbedIcon]) {
+		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:[[%c(SBIconController) sharedInstance] grabbedIcon]];
 		[iconView touchesMoved:touches withEvent:nil];
 		return;
 	}
@@ -535,8 +535,8 @@ static UILabel *indicatorLabel;
 	if (appLaunching)
 		return;
 
-	if ([[objc_getClass("SBIconController") sharedInstance] grabbedIcon]) {
-		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:[[objc_getClass("SBIconController") sharedInstance] grabbedIcon]];
+	if ([[%c(SBIconController) sharedInstance] grabbedIcon]) {
+		SBIconView *iconView = [self.viewMap mappedIconViewForIcon:[[%c(SBIconController) sharedInstance] grabbedIcon]];
 		[iconView touchesEnded:touches withEvent:nil];
 		return;
 	}
@@ -572,7 +572,7 @@ static UILabel *indicatorLabel;
 
 	[self layoutIconsIfNeeded:icon_animation_duration domino:false];
 
-	[[objc_getClass("SBIconController") sharedInstance] iconTapped:iconView];
+	[[%c(SBIconController) sharedInstance] iconTapped:iconView];
 
 }
 
@@ -626,7 +626,7 @@ static UILabel *indicatorLabel;
 	}
 
 	CGFloat collapsedItemWidth = [self collapsedIconWidth];
-	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * ([objc_getClass("SBIconView") defaultVisibleIconImageSize].width + [self iconPadding])) / 2, 0);
+	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * ([%c(SBIconView) defaultVisibleIconImageSize].width + [self iconPadding])) / 2, 0);
 
 	NSInteger index = floorf((arg1.x - (self.bounds.size.width - [self horizontalIconBounds]) / 2 - xOffset) / collapsedItemWidth);
 
@@ -645,7 +645,7 @@ static UILabel *indicatorLabel;
 	}
 
 	CGFloat collapsedItemWidth = [self collapsedIconWidth];
-	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * ([objc_getClass("SBIconView") defaultVisibleIconImageSize].width + [self iconPadding])) / 2, 0);
+	CGFloat xOffset = MAX(([self horizontalIconBounds] - self.model.numberOfIcons * ([%c(SBIconView) defaultVisibleIconImageSize].width + [self iconPadding])) / 2, 0);
 
 	NSInteger index = floorf((arg1.y - (self.bounds.size.height - [self horizontalIconBounds]) / 2 - xOffset) / collapsedItemWidth);
 
@@ -682,7 +682,7 @@ static UILabel *indicatorLabel;
 	%orig();
 	if (![[prefs getenabled] boolValue])
 		return;
-	[[[objc_getClass("SBIconController") sharedInstance] dockListView] collapseAnimated:true];
+	[[[%c(SBIconController) sharedInstance] dockListView] collapseAnimated:true];
 
 
 }
@@ -752,7 +752,7 @@ static UILabel *indicatorLabel;
 
 	// Remove jump animation if in progress
 
-	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];
+	SBDockIconListView *dockListView = [[%c(SBIconController) sharedInstance] dockListView];
 
 	[dockListView removeAllBounceAnimations];
 
@@ -797,8 +797,8 @@ static UILabel *indicatorLabel;
 	}
 
 	// Layout iconBounceWindow
-	UIWindow *bounceWindow = [(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindow];
-	UIWindow *bounceWindowContainer = [(SBUIController*)[objc_getClass("SBUIController") sharedInstance] iconBounceWindowContainer];
+	UIWindow *bounceWindow = [(SBUIController*)[%c(SBUIController) sharedInstance] iconBounceWindow];
+	UIWindow *bounceWindowContainer = [(SBUIController*)[%c(SBUIController) sharedInstance] iconBounceWindowContainer];
 
 	CGFloat rotation;
 
@@ -820,7 +820,7 @@ static UILabel *indicatorLabel;
 	bounceWindowContainer.transform = CGAffineTransformMakeRotation(rotation);
 	bounceWindowContainer.frame = [[UIScreen mainScreen] bounds];
 
-	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];
+	SBDockIconListView *dockListView = [[%c(SBIconController) sharedInstance] dockListView];
 
 	CGRect frame = self.frame;
 
@@ -841,7 +841,7 @@ static UILabel *indicatorLabel;
 	UIView *firstIcon = [_iconListView.viewMap mappedIconViewForIcon:[_iconListView.model.icons firstObject]];
 	UIView *lastIcon = [_iconListView.viewMap mappedIconViewForIcon:[_iconListView.model.icons lastObject]];
 
-	if ([[_iconListView.model.icons lastObject] isKindOfClass:objc_getClass("SBPlaceholderIcon")]) {
+	if ([[_iconListView.model.icons lastObject] isKindOfClass:%c(SBPlaceholderIcon)]) {
 		lastIcon = [_iconListView.viewMap mappedIconViewForIcon:_iconListView.model.icons[([_iconListView.model.icons count]) - 2]];
 	}
 
@@ -884,7 +884,7 @@ static UILabel *indicatorLabel;
 
 %new
 - (void)orientationChanged:(NSNotification*)arg1 {
-	for (UIView *view in [[[objc_getClass("SBIconController") sharedInstance] _rootFolderController] iconListViews]) {
+	for (UIView *view in [[[%c(SBIconController) sharedInstance] _rootFolderController] iconListViews]) {
 		view.alpha = 1;
 	}
 
@@ -910,7 +910,7 @@ static UILabel *indicatorLabel;
 
 			CGFloat opacity = (arg2->x / arg1.frame.size.width) - (CGFloat)page;
 
-			UIView *nextPage = [[[objc_getClass("SBIconController") sharedInstance] _rootFolderController] iconListViewAtIndex:page + 1];
+			UIView *nextPage = [[[%c(SBIconController) sharedInstance] _rootFolderController] iconListViewAtIndex:page + 1];
 
 			nextPage.alpha = opacity;
 		}
@@ -965,7 +965,7 @@ when we are in safe mode
 
 	%orig(arg1);
 
-	SBDockIconListView *dockListView = [[objc_getClass("SBIconController") sharedInstance] dockListView];
+	SBDockIconListView *dockListView = [[%c(SBIconController) sharedInstance] dockListView];
 	[dockListView collapseAnimated:YES];
 }
 
