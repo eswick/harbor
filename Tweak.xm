@@ -95,7 +95,7 @@ static CGFloat xTranslationDamper;
 static UIView *indicatorView;
 static UILabel *indicatorLabel;
 
-+ (NSUInteger)iconColumnsForInterfaceOrientation:(NSInteger)arg1{
++ (NSUInteger)iconColumnsForInterfaceOrientation:(NSInteger)arg1 {
 	if (![[prefs getenabled] boolValue])
 		return %orig(arg1);
 	return 100;
@@ -138,13 +138,8 @@ static UILabel *indicatorLabel;
 
 		[constraints release];
 
-		// -
-
 		[self addSubview:indicatorView];
-
 	}
-
-
 
 	return self;
 }
@@ -186,7 +181,6 @@ static UILabel *indicatorLabel;
 
 %new
 - (CGFloat)scaleForOffsetFromFocusPoint:(CGFloat)offset {
-
 	if (fabs(offset) > [[prefs geteffectiveRange] doubleValue])
 		return [self collapsedIconScale];
 
@@ -195,7 +189,6 @@ static UILabel *indicatorLabel;
 
 %new
 - (CGFloat)xTranslationForOffsetFromFocusPoint:(CGFloat)offset {
-
 	if (xTranslationDamper == 0)
 		xTranslationDamper = 1;
 
@@ -204,7 +197,6 @@ static UILabel *indicatorLabel;
 
 %new
 - (CGFloat)yTranslationForOffsetFromFocusPoint:(CGFloat)offset {
-
 	if (fabs(offset) > [[prefs geteffectiveRange] doubleValue])
 		return 0;
 
@@ -212,27 +204,22 @@ static UILabel *indicatorLabel;
 }
 
 - (void)updateEditingStateAnimated:(BOOL)arg1 {
-
 	%orig(arg1);
 	if (![[prefs getenabled] boolValue])
 		return;
 	[self layoutIconsIfNeeded:0.0 domino:false];
-
 }
 
 %new
 - (CGFloat)iconCenterY {
-
 	if ([[prefs getflushWithBottom] boolValue]) {
 		return (in_landscape ? self.bounds.size.width : self.bounds.size.height) - [self collapsedIconWidth] / 2 - 10.0;
 	} else {
 		return (in_landscape ? self.bounds.size.width : self.bounds.size.height) / 2;
 	}
-
 }
 
 - (void)layoutIconsIfNeeded:(NSTimeInterval)animationDuration domino:(BOOL)arg2 {
-
 	if (![[prefs getenabled] boolValue]) {
 		%orig(animationDuration, arg2);
 		return;
@@ -289,7 +276,6 @@ static UILabel *indicatorLabel;
 	if (activatingIcon) {
 		[self bringSubviewToFront:activatingIcon];
 	}
-
 }
 
 %new
@@ -357,16 +343,11 @@ static UILabel *indicatorLabel;
 		iconView.center = center;
 
 		iconView.transform = CGAffineTransformMakeScale(scale, scale);
-
 	}
-
 }
 
 %new
 - (void)updateIndicatorForIconView:(SBIconView*)iconView animated:(BOOL)animated {
-
-
-
 	if (![[prefs getshowIndicator] boolValue]) {
 		indicatorView.hidden = true;
 		return;
@@ -381,12 +362,14 @@ static UILabel *indicatorLabel;
 				indicatorView.hidden = true;
 				indicatorView.alpha = 1;
 			}];
-		}else{
+		} else {
 			indicatorView.hidden = true;
 		}
 
 		return;
-	}else{
+
+	} else {
+
 		if (animated && indicatorView.hidden) {
 			indicatorView.alpha = 0;
 			indicatorView.hidden = false;
@@ -394,7 +377,7 @@ static UILabel *indicatorLabel;
 			[UIView animateWithDuration:0.2 animations:^{
 				indicatorView.alpha = 1;
 			} completion:nil];
-		}else{
+		} else {
 			indicatorView.hidden = false;
 		}
 	}
@@ -429,16 +412,11 @@ static UILabel *indicatorLabel;
 		[UIView animateWithDuration:0.1 animations:animations completion:nil];
 	else
 		animations();
-
-
 }
 
 #pragma mark Touch Handling
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-
-
-
 	if (![[prefs getenabled] boolValue]) {
 		%orig(touches, event);
 		return;
@@ -458,11 +436,9 @@ static UILabel *indicatorLabel;
 
 	@try {
 		focusedIcon = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:focusPoint]]];
-	}@catch (NSException *exception) { }
+	} @catch (NSException *exception) { }
 
 	[self updateIndicatorForIconView:focusedIcon animated:false];
-
-
 }
 
 
@@ -493,18 +469,14 @@ static UILabel *indicatorLabel;
 		SBIconController *controller = [NSClassFromString(@"SBIconController") sharedInstance];
 
 		if ([controller respondsToSelector:@selector(_revealMenuForIconView:presentImmediately:)]) {
-
 			[controller _revealMenuForIconView:iconView presentImmediately:YES];
-		}
-
-		else if ([controller respondsToSelector:@selector(_revealMenuForIconView:)]) {
+		} else if ([controller respondsToSelector:@selector(_revealMenuForIconView:)]) {
 
 			//queue the shortcut object
 			[controller _revealMenuForIconView:iconView];
 
 			//present it if its successfully been created
 			if ([controller valueForKey:@"_presentedShortcutMenu"]) {
-
 				[[controller valueForKey:@"_presentedShortcutMenu"] performSelector:@selector(presentAnimated:) withObject:@(YES)];
 			}
 		}
@@ -512,7 +484,7 @@ static UILabel *indicatorLabel;
 		%orig(touches, event);
 	}
 
-	if ((in_landscape ? [[touches anyObject] locationInView:self].x : [[touches anyObject] locationInView:self].y) < 0 && (![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) && ((![[objc_getClass("SBIconController") sharedInstance] isEditing] && [[prefs getinitiateEditMode] boolValue]) || [[objc_getClass("SBIconController") sharedInstance] isEditing]) ) {
+	if ((in_landscape ? [[touches anyObject] locationInView:self].x : [[touches anyObject] locationInView:self].y) < 0 && (![[objc_getClass("SBIconController") sharedInstance] grabbedIcon] && iconView) && ((![[objc_getClass("SBIconController") sharedInstance] isEditing] && [[prefs getinitiateEditMode] boolValue]) || [[objc_getClass("SBIconController") sharedInstance] isEditing])) {
 		// get origin, remove transform, restore origin
 		CGPoint origin = iconView.origin;
 		iconView.transform = CGAffineTransformIdentity;
@@ -549,15 +521,12 @@ static UILabel *indicatorLabel;
 
 	@try {
 		focusedIcon = [self.viewMap mappedIconViewForIcon:self.model.icons[[self columnAtX:focusPoint]]];
-	}@catch (NSException *exception) { }
+	} @catch (NSException *exception) { }
 
 	[self updateIndicatorForIconView:focusedIcon animated:true];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-
-
-
 	if (![[prefs getenabled] boolValue]) {
 		%orig(touches, event);
 		return;
@@ -604,7 +573,6 @@ static UILabel *indicatorLabel;
 	[self layoutIconsIfNeeded:icon_animation_duration domino:false];
 
 	[[objc_getClass("SBIconController") sharedInstance] iconTapped:iconView];
-
 
 }
 

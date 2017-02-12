@@ -78,9 +78,6 @@
 %property (nonatomic, retain) HBPassthroughWindow *iconBounceWindow;
 
 - (id)init {
-
-
-
 	self = %orig();
 
 	if (self && [[prefs getenabled] boolValue]) {
@@ -96,8 +93,6 @@
 		[self.iconBounceWindow release];
 		[self.iconBounceWindowContainer release];
 	}
-
-
 
 	return self;
 }
@@ -131,8 +126,6 @@
 }
 
 - (id)initWithDefaultSize {
-
-
 	self = %orig();
 	if (self && [[prefs getenabled] boolValue]) {
 
@@ -148,16 +141,11 @@
 		[self addSubview:self.indicatorView];
 	}
 
-
-
 	return self;
 }
 
 %new
 - (void)bounce {
-
-
-
 	CAKeyframeAnimation *animation = [CAKeyframeAnimation dockBounceAnimationWithIconHeight:[objc_getClass("SBIconView") defaultVisibleIconImageSize].height];
 	animation.delegate = self;
 
@@ -173,27 +161,17 @@
 	}
 
 	[self.layer addAnimation:animation forKey:@"jumping"];
-
-
-
 }
 
 %new
 - (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
-
-
-
 	if ([self isInDock]) {
 		[[[objc_getClass("SBIconController") sharedInstance] dockListView] addSubview:self];
 	}
-
-
 }
 
 %new
 - (void)bounceTimerFired:(NSTimer*)timer {
-
-
 
 	if (self.bouncesRemaining == 0) {
 		[self stopBouncing];
@@ -208,14 +186,10 @@
 
 	if (self.bouncesRemaining != -1)
 		self.bouncesRemaining--;
-
-
 }
 
 %new
 - (void)startBouncing {
-
-
 
 	if (self.bounceTimer)
 		[self stopBouncing];
@@ -234,29 +208,18 @@
 	self.bounceTimer = [NSTimer scheduledTimerWithTimeInterval:bounceInterval target:self selector:@selector(bounceTimerFired:) userInfo:nil repeats:true];
 
 	[self.bounceTimer fire];
-
-
-
 }
 
 %new
 - (void)stopBouncing {
-
-
-
 	if (self.bounceTimer) {
 		[self.bounceTimer invalidate];
 		self.bounceTimer = nil;
 	}
-
-
 }
 
 %new
 - (void)updateBouncingState {
-
-
-
 	if (![[prefs getenabled] boolValue])
 		return;
 
@@ -278,12 +241,9 @@
 
 	}
 
-
 }
 
 - (void)_updateCloseBoxAnimated:(BOOL)arg1 {
-
-
 	if (![[prefs getenabled] boolValue]) {
 		%orig(arg1);
 		return;
@@ -293,15 +253,10 @@
 		return;
 
 	%orig(arg1);
-
-
 }
 
 %new
 - (void)updateIndicatorVisibility {
-
-
-
 	if (![[prefs getenabled] boolValue])
 		return;
 
@@ -320,8 +275,6 @@
 	}
 
 	self.indicatorView.hidden = (![self isInDock] || !applicationRunning);
-
-
 }
 
 - (void)layoutSubviews {
@@ -400,8 +353,6 @@
 
 - (void)publishBulletin:(BBBulletin*)arg1 destinations:(unsigned int)arg2 alwaysToLockScreen:(BOOL)arg3 {
 
-
-
 	SBApplicationIcon *icon = [(SBIconModel*)[[objc_getClass("SBIconController") sharedInstance] model] applicationIconForBundleIdentifier:[arg1 sectionID]];
 	SBIconView *iconView = [[[[objc_getClass("SBIconController") sharedInstance] dockListView] viewMap] mappedIconViewForIcon:icon];
 
@@ -420,8 +371,6 @@
 	}
 
 	%orig(arg1, arg2, arg3);
-
-
 }
 
 %end
@@ -444,7 +393,6 @@
 		self.lastLaunchDate = [NSDate date];
 		[iconView updateBouncingState];
 	}
-
 
 }
 
