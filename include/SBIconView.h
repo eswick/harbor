@@ -171,5 +171,6 @@
 - (void)dealloc;
 - (id)initWithDefaultSize;
 
-@end
+@property(retain, nonatomic) UIGestureRecognizer *appIconForceTouchGestureRecognizer; // @synthesize appIconForceTouchGestureRecognizer=_appIconForceTouchGestureRecognizer;
 
+@end

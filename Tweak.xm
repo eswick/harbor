@@ -20,6 +20,7 @@
 #import "SBIconModelPropertyListFileStore.h"
 #import "SBIconBadgeView.h"
 #import "CDStructures.h"
+#import "SpringBoard_Interfaces.h"
 
 #import "HBPreferences.h"
 
@@ -960,6 +961,48 @@ when we are in safe mode
 %end
 
 %hook SBIconController
+
+// _revealMenuForIconView code by @Andywiik, thank you <3
+
+%new
+- (void)_revealMenuForIconView:(SBIconView *)iconView presentImmediately:(BOOL)arg2 {
+	if ([iconView appIconForceTouchGestureRecognizer]) {
+		UIGestureRecognizer *forceGesture = [iconView appIconForceTouchGestureRecognizer];
+		NSMutableArray *targets = [forceGesture valueForKeyPath:@"_targets"];
+		for (id targetContainer in targets) {
+			if ([(NSObject *)targetContainer valueForKeyPath:@"_target"]) {
+				id target = [(NSObject *)targetContainer valueForKeyPath:@"_target"];
+				if (target) {
+					if ([(NSObject *)target isKindOfClass:NSClassFromString(@"SBUIIconForceTouchController")]) {
+						SBUIIconForceTouchController *forceController = [targetContainer valueForKeyPath:@"_target"];
+						[forceController _setupWithGestureRecognizer:forceGesture];
+						[forceController _presentAnimated:YES withCompletionHandler:nil];
+					}
+				}
+			}
+		}
+	}
+}
+
+%new
+- (void)_revealMenuForIconView:(SBIconView *)iconView {
+	if ([iconView appIconForceTouchGestureRecognizer]) {
+		UIGestureRecognizer *forceGesture = [iconView appIconForceTouchGestureRecognizer];
+		NSMutableArray *targets = [forceGesture valueForKeyPath:@"_targets"];
+		for (id targetContainer in targets) {
+			if ([(NSObject *)targetContainer valueForKeyPath:@"_target"]) {
+				id target = [(NSObject *)targetContainer valueForKeyPath:@"_target"];
+				if (target) {
+					if ([(NSObject *)target isKindOfClass:NSClassFromString(@"SBUIIconForceTouchController")]) {
+						SBUIIconForceTouchController *forceController = [targetContainer valueForKeyPath:@"_target"];
+						[forceController _setupWithGestureRecognizer:forceGesture];
+						[forceController _presentAnimated:YES withCompletionHandler:nil];
+					}
+				}
+			}
+		}
+	}
+}
 
 - (void)applicationShortcutMenuDidDismiss:(id)arg1 {
 
