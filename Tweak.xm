@@ -533,6 +533,10 @@ static UILabel *indicatorLabel;
 		return;
 	}
 
+	if ([%c(SBUIIconForceTouchController) _isPeekingOrShowing]) {
+		return;
+	}
+
 	if (appLaunching)
 		return;
 
@@ -579,8 +583,6 @@ static UILabel *indicatorLabel;
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 
-
-
 	if (![[prefs getenabled] boolValue]) {
 		%orig(touches, event);
 		return;
@@ -601,14 +603,9 @@ static UILabel *indicatorLabel;
 
 %new
 - (void)collapseAnimated:(BOOL)animated {
-
-
-
 	trackingTouch = false;
 	activatingIcon = nil;
 	[self layoutIconsIfNeeded:animated ? icon_animation_duration : 0.0 domino:false];
-
-
 }
 
 %new
@@ -668,6 +665,16 @@ static UILabel *indicatorLabel;
 	[self collapseAnimated:true];
 
 
+}
+
+%end
+
+%hook SBUIAppIconForceTouchController
+
+- (void)iconForceTouchController:(id)arg1 willDismissForGestureRecognizer:(id)arg2 {
+	%orig;
+	SBDockIconListView *dockListView = [[%c(SBIconController) sharedInstance] dockListView];
+	[dockListView collapseAnimated:true];
 }
 
 %end
@@ -1005,7 +1012,6 @@ when we are in safe mode
 }
 
 - (void)applicationShortcutMenuDidDismiss:(id)arg1 {
-
 	%orig(arg1);
 
 	SBDockIconListView *dockListView = [[%c(SBIconController) sharedInstance] dockListView];

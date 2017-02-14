@@ -1,6 +1,8 @@
 
 @interface SBUIIconForceTouchController : NSObject
 
++ (BOOL)_isPeekingOrShowing;
+
 - (void)_presentAnimated:(BOOL)arg1 withCompletionHandler:(void(^)())arg2;
 - (void)_setupWithGestureRecognizer:(id)arg1;
 
