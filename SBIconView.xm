@@ -125,10 +125,9 @@
 	return %orig(point, event);
 }
 
-- (id)initWithDefaultSize {
+- (id)initWithContentType:(unsigned long long)arg1 {
 	self = %orig();
-	if (self && [[prefs getenabled] boolValue]) {
-
+	if (self) {
 		self.indicatorView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 5, 5)];
 		self.indicatorView.backgroundColor = [UIColor blackColor];
 		self.indicatorView.clipsToBounds = true;
@@ -269,7 +268,7 @@
 
 	if ([self.icon isKindOfClass:%c(SBApplicationIcon)]) {
 		SBApplicationIcon *icon = (SBApplicationIcon*)self.icon;
-		if ([icon.application activationState] >= SBActivationStateActivated) {
+		if ([icon.application isRunning]) {
 			applicationRunning = true;
 		}
 	}
